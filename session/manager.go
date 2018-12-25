@@ -21,13 +21,13 @@ type Config struct {
 }
 
 type Manager struct {
-	store *Store
+	store  *Store
 	Config *Config
 }
 
 func NewManager(config *Config) *Manager {
 	m := &Manager{
-		Config:config,
+		Config: config,
 	}
 	m.store = m.buildSession(
 		m.parseStoreHandler(),
@@ -64,14 +64,14 @@ func (m *Manager) usingCookieSessions() (handler *CookieHandler, ok bool) {
 	return
 }
 
-func (m *Manager) parseStoreHandler() (Handler) {
+func (m *Manager) parseStoreHandler() Handler {
 	var storeHandler Handler
 	switch m.Config.Driver {
 	case "cookie":
 		storeHandler = &CookieHandler{}
 	case "file":
 		storeHandler = &FileHandler{
-			Path: m.Config.Files,
+			Path:     m.Config.Files,
 			Lifetime: m.Config.Lifetime,
 		}
 	default:

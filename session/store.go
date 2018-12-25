@@ -1,14 +1,14 @@
 package session
 
 import (
-	"encoding/json"
-	"time"
-	"io"
 	"crypto/rand"
-	"strconv"
 	"crypto/sha1"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
+	"strconv"
+	"time"
 )
 
 type Store struct {

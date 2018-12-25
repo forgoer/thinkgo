@@ -2,10 +2,11 @@ package thinkgo
 
 import (
 	"reflect"
+
+	"github.com/thinkoner/thinkgo/config"
 	"github.com/thinkoner/thinkgo/context"
 	"github.com/thinkoner/thinkgo/route"
 	"github.com/thinkoner/thinkgo/session"
-	"github.com/thinkoner/thinkgo/config"
 )
 
 type RouteHandler struct {

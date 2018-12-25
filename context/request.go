@@ -1,10 +1,10 @@
 package context
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strings"
-	"errors"
 )
 
 //Request HTTP request

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"github.com/thinkoner/thinkgo/route"
-	"github.com/thinkoner/thinkgo/view"
+
 	"github.com/thinkoner/thinkgo/config"
 	"github.com/thinkoner/thinkgo/helper"
+	"github.com/thinkoner/thinkgo/route"
+	"github.com/thinkoner/thinkgo/view"
 )
 
 var application *Application

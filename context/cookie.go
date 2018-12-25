@@ -1,10 +1,10 @@
 package context
 
 import (
-	"time"
+	"errors"
 	"net/http"
 	"net/url"
-	"errors"
+	"time"
 )
 
 type CookieConfig struct {

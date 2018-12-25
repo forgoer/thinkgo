@@ -2,19 +2,20 @@ package route
 
 import (
 	"net/http"
+
 	"github.com/thinkoner/thinkgo/filesystem"
 )
 
-type staticHandle struct{
+type staticHandle struct {
 	fileServer http.Handler
-	fs http.FileSystem
+	fs         http.FileSystem
 }
 
-func NewStaticHandle(root string) http.Handler  {
+func NewStaticHandle(root string) http.Handler {
 	fs := filesystem.NewFileFileSystem(root, false)
 	return &staticHandle{
 		fileServer: http.FileServer(fs),
-		fs:fs,
+		fs:         fs,
 	}
 }
 

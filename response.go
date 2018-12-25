@@ -2,8 +2,9 @@ package thinkgo
 
 import (
 	"encoding/json"
-	"github.com/thinkoner/thinkgo/context"
 	"net/http"
+
+	"github.com/thinkoner/thinkgo/context"
 )
 
 //Response an HTTP response interface

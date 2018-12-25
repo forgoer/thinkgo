@@ -2,8 +2,9 @@ package session
 
 import (
 	"path"
-	"github.com/thinkoner/thinkgo/filesystem"
 	"time"
+
+	"github.com/thinkoner/thinkgo/filesystem"
 )
 
 type FileHandler struct {

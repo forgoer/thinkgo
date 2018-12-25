@@ -1,9 +1,9 @@
 package filesystem
 
 import (
+	"io"
 	"net/http"
 	"os"
-	"io"
 )
 
 type JustFileSystem struct {

@@ -1,9 +1,9 @@
 package context
 
 import (
+	"io"
 	"mime/multipart"
 	"os"
-	"io"
 	"path"
 )
 
@@ -11,7 +11,7 @@ type File struct {
 	FileHeader *multipart.FileHeader
 }
 
-func (f *File) Move(directory string, name ...string) (bool,error)  {
+func (f *File) Move(directory string, name ...string) (bool, error) {
 	src, err := f.FileHeader.Open()
 	if err != nil {
 		return false, err
@@ -24,7 +24,7 @@ func (f *File) Move(directory string, name ...string) (bool,error)  {
 		fname = name[0]
 	}
 
-	dst := path.Join(directory,fname)
+	dst := path.Join(directory, fname)
 
 	out, err := os.Create(dst)
 	if err != nil {
@@ -34,5 +34,5 @@ func (f *File) Move(directory string, name ...string) (bool,error)  {
 
 	io.Copy(out, src)
 
-	return true,nil
+	return true, nil
 }

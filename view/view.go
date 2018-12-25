@@ -5,8 +5,9 @@ import (
 	"html/template"
 	"path"
 	"strings"
-	"github.com/thinkoner/thinkgo/helper"
+
 	"github.com/thinkoner/thinkgo/filesystem"
+	"github.com/thinkoner/thinkgo/helper"
 )
 
 type View struct {

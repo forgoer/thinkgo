@@ -1,12 +1,12 @@
 package helper
 
 import (
-	"reflect"
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
-func GetString(value interface{}) (string,error)  {
+func GetString(value interface{}) (string, error) {
 	if value == nil {
 		return "", nil
 	}
@@ -14,10 +14,10 @@ func GetString(value interface{}) (string,error)  {
 	t := reflect.TypeOf(value)
 	switch t.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64,reflect.Float32, reflect.Float64:
+		reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
 		return NumericalToString(value), nil
 	case reflect.String:
-		return value.(string),nil
+		return value.(string), nil
 	default:
 		return "", fmt.Errorf("Convert: type %T Cannot be converted to a string value %#v", t, value)
 	}

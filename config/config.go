@@ -5,6 +5,7 @@ import "time"
 var App *AppConfig
 var Route *RouteConfig
 var View *ViewConfig
+
 //var Database *DatabaseConfig
 var Cookie *CookieConfig
 var Session *SessionConfig
@@ -54,10 +55,10 @@ func loadCookieConfig() {
 
 func loadSessionConfig() {
 	Session = &SessionConfig{
-		Driver:   "file",
-		Lifetime: time.Hour * 4,
-		Encrypt:  false,
-		Files:    "temp/sessions",
-		CookieName:  "thinkgo_sessions",
+		Driver:     "file",
+		Lifetime:   time.Hour * 4,
+		Encrypt:    false,
+		Files:      "temp/sessions",
+		CookieName: "thinkgo_sessions",
 	}
 }

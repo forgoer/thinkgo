@@ -1,12 +1,12 @@
 package filesystem
 
 import (
+	"io/ioutil"
 	"os"
 	"path"
-	"io/ioutil"
+	"path/filepath"
 	"sync"
 	"time"
-	"path/filepath"
 )
 
 var lock sync.RWMutex

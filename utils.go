@@ -1,9 +1,10 @@
 package thinkgo
 
 import (
-	"github.com/thinkoner/thinkgo/context"
-	"github.com/thinkoner/thinkgo/config"
 	"time"
+
+	"github.com/thinkoner/thinkgo/config"
+	"github.com/thinkoner/thinkgo/context"
 )
 
 func parseCookieHandler() *context.Cookie {

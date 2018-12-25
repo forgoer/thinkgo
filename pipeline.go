@@ -3,6 +3,7 @@ package thinkgo
 import (
 	"container/list"
 	"net/http"
+
 	"github.com/thinkoner/thinkgo/context"
 )
 
@@ -60,8 +61,8 @@ func (p *Pipeline) Run() interface{} {
 }
 
 func (p *Pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	request :=context.NewRequest(r)
-	request.CookieHandler =parseCookieHandler()
+	request := context.NewRequest(r)
+	request.CookieHandler = parseCookieHandler()
 	p.Passable(request)
 
 	result := p.Run()

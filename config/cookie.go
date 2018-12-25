@@ -4,7 +4,7 @@ import "time"
 
 type CookieConfig struct {
 	Prefix   string
-	Expires   time.Duration
+	Expires  time.Duration
 	Path     string
 	Domain   string
 	MaxAge   int

@@ -6,6 +6,28 @@
   <strong>ThinkGo is a lightweight MVC framework written in Go (Golang).</strong>
 </p>
 
+<p align="center">
+    <a href="https://goreportcard.com/report/github.com/thinkoner/thinkgo">
+    <img src="https://goreportcard.com/badge/github.com/thinkoner/thinkgo" alt="Go Report Card">
+  </a>
+  <a href="https://godoc.org/github.com/thinkoner/thinkgo">
+    <img src="https://godoc.org/github.com/thinkoner/thinkgo?status.svg" alt="GoDoc">
+  </a>
+  <a href="https://www.codetriage.com/thinkoner/thinkgo">
+    <img src="https://www.codetriage.com/thinkoner/thinkgo/badges/users.svg" alt="Open Source Helpers">
+  </a>
+  <a href="https://gitter.im/think-go/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+        <img src="https://badges.gitter.im/think-go/community.svg" alt="Join the chat">
+  </a>
+  <a href="https://github.com/thinkoner/thinkgo/releases">
+        <img src="https://img.shields.io/github/release/thinkoner/thinkgo.svg" alt="Latest Stable Version">
+    </a>
+    <a href="LICENSE">
+            <img src="https://img.shields.io/github/license/thinkoner/thinkgo.svg" alt="License">
+        </a>
+</p>
+
+
 ## Installation
 
 The only requirement is the [Go Programming Language](https://golang.org/dl/)
