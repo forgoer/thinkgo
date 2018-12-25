@@ -8,6 +8,8 @@
 
 ## Installation
 
+[![Join the chat at https://gitter.im/think-go/community](https://badges.gitter.im/think-go/community.svg)](https://gitter.im/think-go/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 The only requirement is the [Go Programming Language](https://golang.org/dl/)
 
 ```
