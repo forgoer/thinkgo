@@ -50,7 +50,7 @@ func Json(v interface{}) *context.Response {
 // Text Create a new HTTP Response with TEXT data
 func Text(s string) *context.Response {
 	r := NewResponse()
-	r.SetContentType("application/text")
+	r.SetContentType("text/plain")
 	r.SetContent(s)
 	return r
 }
