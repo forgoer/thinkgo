@@ -74,9 +74,9 @@ func (r *Response) Send(w http.ResponseWriter) {
 		http.SetCookie(w, cookie)
 	}
 
-	w.WriteHeader(r.GetCode())
-
 	w.Header().Set("Content-Type", r.GetContentType()+";"+" charset="+r.GetCharset())
+
+	w.WriteHeader(r.GetCode())
 
 	w.Write([]byte(r.GetContent()))
 }
