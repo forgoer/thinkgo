@@ -44,17 +44,17 @@ func (r *Response) GetCharset() string {
 	return r.charset
 }
 
-//GetCode get the response status code.
+// GetCode get the response status code.
 func (r *Response) GetCode() int {
 	return r.code
 }
 
-//GetCode get the response content.
+// GetCode get the response content.
 func (r *Response) GetContent() string {
 	return r.content
 }
 
-//Cookie Add a cookie to the response.
+// Cookie Add a cookie to the response.
 func (r *Response) Cookie(name interface{}, params ...interface{}) error {
 	cookie, err := r.CookieHandler.Set(name, params...)
 

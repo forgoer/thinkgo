@@ -3,28 +3,28 @@
 </h1>
 
 <p align="center">
-  <strong>ThinkGo is a lightweight MVC framework written in Go (Golang).</strong>
+	<strong>ThinkGo is a lightweight MVC framework written in Go (Golang).</strong>
 </p>
 
 <p align="center">
-    <a href="https://goreportcard.com/report/github.com/thinkoner/thinkgo">
-    <img src="https://goreportcard.com/badge/github.com/thinkoner/thinkgo" alt="Go Report Card">
-  </a>
-  <a href="https://godoc.org/github.com/thinkoner/thinkgo">
-    <img src="https://godoc.org/github.com/thinkoner/thinkgo?status.svg" alt="GoDoc">
-  </a>
-  <a href="https://www.codetriage.com/thinkoner/thinkgo">
-    <img src="https://www.codetriage.com/thinkoner/thinkgo/badges/users.svg" alt="Open Source Helpers">
-  </a>
-  <a href="https://gitter.im/think-go/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
-        <img src="https://badges.gitter.im/think-go/community.svg" alt="Join the chat">
-  </a>
-  <a href="https://github.com/thinkoner/thinkgo/releases">
-        <img src="https://img.shields.io/github/release/thinkoner/thinkgo.svg" alt="Latest Stable Version">
-    </a>
-    <a href="LICENSE">
-            <img src="https://img.shields.io/github/license/thinkoner/thinkgo.svg" alt="License">
-        </a>
+	<a href="https://goreportcard.com/report/github.com/thinkoner/thinkgo">
+		<img src="https://goreportcard.com/badge/github.com/thinkoner/thinkgo" alt="Go Report Card">
+  	</a>
+	<a href="https://godoc.org/github.com/thinkoner/thinkgo">
+		<img src="https://godoc.org/github.com/thinkoner/thinkgo?status.svg" alt="GoDoc">
+  	</a>
+	<a href="https://www.codetriage.com/thinkoner/thinkgo">
+		<img src="https://www.codetriage.com/thinkoner/thinkgo/badges/users.svg" alt="Open Source Helpers">
+  	</a>
+	<a href="https://gitter.im/think-go/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+		<img src="https://badges.gitter.im/think-go/community.svg" alt="Join the chat">
+  	</a>
+	<a href="https://github.com/thinkoner/thinkgo/releases">
+		<img src="https://img.shields.io/github/release/thinkoner/thinkgo.svg" alt="Latest Stable Version">
+	</a>
+	<a href="LICENSE">
+		<img src="https://img.shields.io/github/license/thinkoner/thinkgo.svg" alt="License">
+	</a>
 </p>
 
 
@@ -59,7 +59,7 @@ func main() {
 		route.Get("/ping", func(req *context.Request) thinkgo.Response {
 			return thinkgo.Json(map[string]string{
 				"message": "pong",
-			})
+		    })
 		})
 
 		// Dependency injection
@@ -72,7 +72,7 @@ func main() {
 }
 ```
 
-## Table of contents
+## Features
 
 - [Routing](#routing)
 - [Controller](#controller)
@@ -80,6 +80,8 @@ func main() {
 - [Response](#http-response)
 - [View](#view)
 - [HTTP Session](#http-session)
+- [Logging](#logging)
+- [ORM](#orm)
 
 ## Routing
 
@@ -89,9 +91,9 @@ The most basic routes accept a URI and a Closure, providing a very simple and ex
 
 ```go
 app.RegisterRoute(func(route *route.Route) {
-    route.Get("/foo", func(req *context.Request) thinkgo.Response {
-        return thinkgo.Text("Hello ThinkGo !")
-    })
+	route.Get("/foo", func(req *context.Request) thinkgo.Response {
+		return thinkgo.Text("Hello ThinkGo !")
+	})
 })
 ```
 
@@ -198,7 +200,7 @@ The `method` method will return the HTTP verb for the request.
 method := req.GetMethod();
 ```
 
-### Retrieving Cookies From Requests
+#### Retrieving Cookies From Requests
 
 ```go
 name, _ := request.Cookie("name")
@@ -208,7 +210,7 @@ name, _ := request.Cookie("name")
 
 an HTTP Response Must implement the `thinkgo.Response` interface
 
-### Creating Responses
+#### Creating Responses
 
 a simple strings or json Response:
 
@@ -220,7 +222,7 @@ thinkgo.Json(map[string]string{
 			})
 ```
 
-### Attaching Cookies To Responses
+#### Attaching Cookies To Responses
 
 ```go
 response.Cookie("name", "alice")
@@ -237,11 +239,11 @@ views are stored in the `views` directory, A simple view might look something li
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ .Title }}</title>
+	<meta charset="UTF-8">
+	<title>{{ .Title }}</title>
 </head>
 <body>
-    {{ template "content" .}}
+	{{ template "content" .}}
 </body>
 </html>
 {{ end }}
@@ -278,6 +280,27 @@ storing Data like this:
 ```go
 request.Session().Set("user", "alice")
 ```
+
+## Logging
+
+The logger provides the eight logging levels defined in [RFC 5424]( https://tools.ietf.org/html/rfc5424 ): **emergency**, **alert**, **critical**, **error**, **warning**, **notice**, **info** and **debug**.
+
+```go
+import "github.com/thinkoner/thinkgo/log"
+
+log.Debug("log with Debug")
+log.Info("log with Info")
+log.Notice("log with Notice")
+log.Warn("log with Warn")
+log.Error("log with Error")
+log.Crit("log with Crit")
+log.Alert("log with Alert")
+log.Emerg("log with Emerg")
+```
+
+## ORM
+
+refer to [ThinkORM]( https://github.com/thinkoner/thinkorm )
 
 ## License
 

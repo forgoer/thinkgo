@@ -3,6 +3,7 @@ package thinkgo
 import (
 	"fmt"
 	"net/http"
+
 	"time"
 
 	"github.com/thinkoner/thinkgo/config"
@@ -24,7 +25,7 @@ type ThinkGo struct {
 	handlers []handlerFunc
 }
 
-//BootStrap Create The Application
+// BootStrap Create The Application
 func BootStrap() *ThinkGo {
 	application = NewApplication()
 	think := &ThinkGo{
@@ -56,12 +57,12 @@ func (think *ThinkGo) bootRoute() {
 	think.handlers = append(think.handlers, NewRouteHandler)
 }
 
-//RegisterRoute Register Route
+// RegisterRoute Register Route
 func (think *ThinkGo) RegisterRoute(register registerRouteFunc) {
 	register(think.App.Route)
 }
 
-//RegisterConfig Register Config
+// RegisterConfig Register Config
 func (think *ThinkGo) RegisterConfig(register registerConfigFunc) {
 	register()
 }

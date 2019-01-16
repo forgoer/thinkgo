@@ -15,12 +15,12 @@ func NewApplication() *Application {
 	return &Application{}
 }
 
-//RegisterRoute Register Route for Application
+// RegisterRoute Register Route for Application
 func (a *Application) RegisterRoute(r *route.Route) {
 	a.Route = r
 }
 
-//RegisterView Register View for Application
+// RegisterView Register View for Application
 func (a *Application) RegisterView(v View) {
 	a.View = v
 }

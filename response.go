@@ -7,7 +7,7 @@ import (
 	"github.com/thinkoner/thinkgo/context"
 )
 
-//Response an HTTP response interface
+// Response an HTTP response interface
 type Response interface {
 	Send(w http.ResponseWriter)
 }
