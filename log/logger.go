@@ -2,10 +2,10 @@ package log
 
 import (
 	"container/list"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/thinkoner/thinkgo/log/handler"
 	"github.com/thinkoner/thinkgo/log/record"
 )
