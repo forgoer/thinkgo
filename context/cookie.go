@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/thinkoner/thinkgo/config"
 )
 
 type CookieConfig struct {
@@ -90,4 +92,18 @@ func (c *Cookie) Set(name interface{}, params ...interface{}) (*http.Cookie, err
 		return nil, errors.New("Invalid parameters for Cookie.")
 	}
 	return cookie, nil
+}
+
+func ParseCookieHandler() *Cookie {
+	return &Cookie{
+		Config: &CookieConfig{
+			Prefix:   config.Cookie.Prefix,
+			Path:     config.Cookie.Path,
+			Domain:   config.Cookie.Domain,
+			Expires:  time.Now().Add(config.Cookie.Expires),
+			MaxAge:   config.Cookie.MaxAge,
+			Secure:   config.Cookie.Secure,
+			HttpOnly: config.Cookie.HttpOnly,
+		},
+	}
 }

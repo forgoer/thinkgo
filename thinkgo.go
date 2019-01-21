@@ -6,28 +6,27 @@ import (
 
 	"time"
 
+	"github.com/thinkoner/thinkgo/app"
 	"github.com/thinkoner/thinkgo/config"
 	"github.com/thinkoner/thinkgo/helper"
-	"github.com/thinkoner/thinkgo/route"
+	"github.com/thinkoner/thinkgo/router"
 	"github.com/thinkoner/thinkgo/view"
 )
 
-var application *Application
+var application *app.Application
 
-type handlerFunc func(app *Application) Handler
-
-type registerRouteFunc func(route *route.Route)
+type registerRouteFunc func(route *router.Route)
 
 type registerConfigFunc func()
 
 type ThinkGo struct {
-	App      *Application
-	handlers []handlerFunc
+	App      *app.Application
+	handlers []app.HandlerFunc
 }
 
 // BootStrap Create The Application
 func BootStrap() *ThinkGo {
-	application = NewApplication()
+	application = app.NewApplication()
 	think := &ThinkGo{
 		App: application,
 	}
@@ -37,29 +36,11 @@ func BootStrap() *ThinkGo {
 	return think
 }
 
-func (think *ThinkGo) bootView() {
-	v := view.NewView()
-	v.SetPath(config.View.Path)
-	think.App.RegisterView(v)
-
-}
-
-func (think *ThinkGo) bootSession() {
-	think.handlers = append(think.handlers, NewSessionHandler)
-}
-
-func (think *ThinkGo) bootRoute() {
-	r := route.NewRoute()
-
-	r.Statics(config.Route.Static)
-
-	think.App.RegisterRoute(r)
-	think.handlers = append(think.handlers, NewRouteHandler)
-}
-
 // RegisterRoute Register Route
 func (think *ThinkGo) RegisterRoute(register registerRouteFunc) {
-	register(think.App.Route)
+	route := think.App.GetRoute()
+	defer route.Register()
+	register(route)
 }
 
 // RegisterConfig Register Config
@@ -98,4 +79,21 @@ func (think *ThinkGo) Run(params ...string) {
 	}()
 
 	<-endRunning
+}
+
+func (think *ThinkGo) bootView() {
+	v := view.NewView()
+	v.SetPath(config.View.Path)
+	think.App.RegisterView(v)
+}
+
+func (think *ThinkGo) bootSession() {
+	think.handlers = append(think.handlers, app.NewSessionHandler)
+}
+
+func (think *ThinkGo) bootRoute() {
+	r := router.NewRoute()
+	r.Statics(config.Route.Static)
+	think.App.RegisterRoute(r)
+	think.handlers = append(think.handlers, app.NewRouteHandler)
 }

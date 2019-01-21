@@ -1,16 +1,13 @@
-package thinkgo
+package router
 
 import (
 	"container/list"
-	"net/http"
 
-	"github.com/thinkoner/thinkgo/app"
 	"github.com/thinkoner/thinkgo/context"
-	"github.com/thinkoner/thinkgo/router"
 )
 
 type Pipeline struct {
-	handlers []app.Handler
+	handlers []Middleware
 	pipeline *list.List
 	passable *context.Request
 }
@@ -24,13 +21,13 @@ func NewPipeline() *Pipeline {
 }
 
 // Pipe Push a Middleware Handler to the pipeline
-func (p *Pipeline) Pipe(m app.Handler) *Pipeline {
+func (p *Pipeline) Pipe(m Middleware) *Pipeline {
 	p.pipeline.PushBack(m)
 	return p
 }
 
 // Pipe Batch push Middleware Handlers to the pipeline
-func (p *Pipeline) Through(hls []app.Handler) *Pipeline {
+func (p *Pipeline) Through(hls []Middleware) *Pipeline {
 	for _, hl := range hls {
 		p.Pipe(hl)
 	}
@@ -44,8 +41,11 @@ func (p *Pipeline) Passable(passable *context.Request) *Pipeline {
 }
 
 // Run run the pipeline
-func (p *Pipeline) Run() interface{} {
+func (p *Pipeline) Run(destination Middleware) interface{} {
 	var result interface{}
+
+	p.Pipe(destination)
+
 	e := p.pipeline.Front()
 	if e != nil {
 		result = p.handler(p.passable, e)
@@ -53,34 +53,16 @@ func (p *Pipeline) Run() interface{} {
 	return result
 }
 
-// ServeHTTP
-func (p *Pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	request := context.NewRequest(r)
-	request.CookieHandler = context.ParseCookieHandler()
-	p.Passable(request)
-
-	result := p.Run()
-
-	switch result.(type) {
-	case router.Response:
-		result.(router.Response).Send(w)
-		return
-	case http.Handler:
-		result.(http.Handler).ServeHTTP(w, r)
-		return
-	}
-}
-
 func (p *Pipeline) handler(passable *context.Request, e *list.Element) interface{} {
 	if e == nil {
 		return nil
 	}
-	hl := e.Value.(app.Handler)
-	result := hl.Process(passable, p.closure(e))
+	middleware := e.Value.(Middleware)
+	result := middleware(passable, p.closure(e))
 	return result
 }
 
-func (p *Pipeline) closure(e *list.Element) app.Closure {
+func (p *Pipeline) closure(e *list.Element) Closure {
 	return func(req *context.Request) interface{} {
 		e = e.Next()
 		return p.handler(req, e)

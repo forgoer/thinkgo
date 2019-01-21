@@ -1,7 +1,10 @@
-package route
+package router
 
-import "strings"
+import (
+	"strings"
+)
 
+// Method Convert multiple method strings to an slice
 func Method(method ...string) []string {
 	var methods []string
 	if len(method) == 0 {

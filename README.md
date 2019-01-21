@@ -44,26 +44,26 @@ package main
 import (
 	"github.com/thinkoner/thinkgo"
 	"fmt"
-	"github.com/thinkoner/thinkgo/route"
+	"github.com/thinkoner/thinkgo/router"
 	"github.com/thinkoner/thinkgo/context"
 )
 
 func main() {
 	app := thinkgo.BootStrap()
-	app.RegisterRoute(func(route *route.Route) {
+	app.RegisterRoute(func(route *router.Route) {
 
-		route.Get("/", func(req *context.Request) thinkgo.Response {
+		route.Get("/", func(req *context.Request) *context.Response {
 			return thinkgo.Text("Hello ThinkGo !")
 		})
 
-		route.Get("/ping", func(req *context.Request) thinkgo.Response {
+		route.Get("/ping", func(req *context.Request) *context.Response {
 			return thinkgo.Json(map[string]string{
 				"message": "pong",
 		    })
 		})
 
 		// Dependency injection
-		route.Get("/user/{name}", func(req *context.Request, name string) thinkgo.Response {
+		route.Get("/user/{name}", func(req *context.Request, name string) *context.Response {
 			return thinkgo.Text(fmt.Sprintf("Hello %s !", name))
 		})
 	})
@@ -75,6 +75,7 @@ func main() {
 ## Features
 
 - [Routing](#routing)
+- [Middleware](#middleware)
 - [Controller](#controller)
 - [Request](#http-request)
 - [Response](#http-response)
@@ -90,8 +91,8 @@ func main() {
 The most basic routes accept a URI and a Closure, providing a very simple and expressive method of defining routes:
 
 ```go
-app.RegisterRoute(func(route *route.Route) {
-	route.Get("/foo", func(req *context.Request) thinkgo.Response {
+app.RegisterRoute(func(route *router.Route) {
+	route.Get("/foo", func(req *context.Request) *context.Response {
 		return thinkgo.Text("Hello ThinkGo !")
 	})
 })
@@ -121,7 +122,7 @@ route.Any("/someAny", any)
 Of course, sometimes you will need to capture segments of the URI within your route. For example, you may need to capture a user's ID from the URL. You may do so by defining route parameters:
 
 ```go
-route.Get("/user/{id}", func(req *context.Request, id string) thinkgo.Response {
+route.Get("/user/{id}", func(req *context.Request, id string) *context.Response {
 	return thinkgo.Text(fmt.Sprintf("User %s", id))
 })
 ```
@@ -129,8 +130,70 @@ route.Get("/user/{id}", func(req *context.Request, id string) thinkgo.Response {
 You may define as many route parameters as required by your route:
 
 ```go
-route.Get("/posts/{post}/comments/{comment}", func(req *context.Request, postId, commentId string) thinkgo.Response {
+route.Get("/posts/{post}/comments/{comment}", func(req *context.Request, postId, commentId string) *context.Response {
 	//
+})
+```
+
+#### Route Prefixes
+
+The prefix method may be used to prefix each route in the group with a given URI. For example, you may want to prefix all route URIs within the group with `admin`:
+
+```go
+route.Prefix("/admin").Group(func(group *router.Route) {
+	group.Prefix("user").Group(func(group *router.Route) {
+	    // ... 	
+	})
+	group.Prefix("posts").Group(func(group *router.Route) {
+		// ... 	
+    })
+})
+```
+
+## Middleware
+
+Middleware provide a convenient mechanism for filtering HTTP requests entering your application. You only need to implement  the `Middleware` interface.
+
+```go
+route.Get("/foo", func(request *context.Request) *context.Response {
+	return thinkgo.Text("Hello ThinkGo !")
+}).Middleware(func(request *context.Request, next router.Closure) interface{} {
+	if _, err := request.Input("name"); err != nil {
+		return thinkgo.Text("Invalid parameters")
+	}
+	return next(request)
+})
+```
+
+#### Route Groups
+
+Route groups allow you to share route attributes, such as middleware or prefix, across a large number of routes without needing to define those attributes on each individual route.
+
+```go
+route.Prefix("/admin").Group(func(group *router.Route) {
+	group.Prefix("user").Group(func(group *router.Route) {
+		group.Get("", func(request *context.Request) *context.Response {
+			return thinkgo.Text("admin user !")
+		}).Middleware(func(request *context.Request, next router.Closure) interface{} {
+			if _, err := request.Input("id"); err != nil {
+				return thinkgo.Text("Invalid parameters")
+			}
+			return next(request)
+		})
+		group.Get("edit", func(request *context.Request) *context.Response {
+			return thinkgo.Text("admin user edit !")
+		})
+	}).Middleware(func(request *context.Request, next router.Closure) interface{} {
+		if _, err := request.Input("user"); err != nil {
+			return thinkgo.Text("Invalid parameters")
+		}
+		return next(request)
+	})
+}).Middleware(func(request *context.Request, next router.Closure) interface{} {
+	if _, err := request.Input("token"); err != nil {
+		return thinkgo.Text("Invalid parameters")
+	}
+	return next(request)
 })
 ```
 
@@ -148,7 +211,7 @@ import (
 	"github.com/thinkoner/thinkgo/context"
 )
 
-func Index(req *context.Request) thinkgo.Response {
+func Index(req *context.Request) *context.Response {
 	return thinkgo.Text("Hello ThinkGo !")
 }
 
@@ -171,7 +234,7 @@ This feature will be supported in a future release.
 To obtain an instance of the current HTTP request via dependency injection
 
 ```go
-func Handler(req *context.Request) thinkgo.Response {
+func Handler(req *context.Request) *context.Response {
 	name := req.Input("name")
 }
 ```
@@ -181,7 +244,7 @@ func Handler(req *context.Request) thinkgo.Response {
 If your controller method is also expecting input from a route parameter you should list your route parameters after the request dependencies. For example, you can access your route parameter `name` like so:
 
 ```go
-route.Put("/user/{name}", func(req *context.Request, name string) thinkgo.Response {
+route.Put("/user/{name}", func(req *context.Request, name string) *context.Response {
 	//
 })
 ```
@@ -208,7 +271,7 @@ name, _ := request.Cookie("name")
 
 ## HTTP Response
 
-an HTTP Response Must implement the `thinkgo.Response` interface
+an HTTP Response Must implement the `*context.Response` interface
 
 #### Creating Responses
 
@@ -226,6 +289,14 @@ thinkgo.Json(map[string]string{
 
 ```go
 response.Cookie("name", "alice")
+```
+
+#### Redirects
+
+```go
+route.Get("/redirect", func(request *context.Request) *context.Response {
+	return context.Redirect("https://www.google.com")
+})
 ```
 
 ## View
@@ -261,7 +332,7 @@ views are stored in the `views` directory, A simple view might look something li
 we may return it using the `Render` function like so:
 
 ```go
-route.Get("/tpl", func(request *context.Request) thinkgo.Response {
+route.Get("/tpl", func(request *context.Request) *context.Response {
 	data := map[string]interface{}{"Title": "ThinkGo", "Message": "Hello ThinkGo !"}
 	return thinkgo.Render("tpl.html", data)
 })

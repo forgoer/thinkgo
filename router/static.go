@@ -1,4 +1,4 @@
-package route
+package router
 
 import (
 	"net/http"
@@ -11,6 +11,7 @@ type staticHandle struct {
 	fs         http.FileSystem
 }
 
+// NewStaticHandle A Handler responds to a Static HTTP request.
 func NewStaticHandle(root string) http.Handler {
 	fs := filesystem.NewFileFileSystem(root, false)
 	return &staticHandle{
@@ -19,6 +20,7 @@ func NewStaticHandle(root string) http.Handler {
 	}
 }
 
+// ServeHTTP  responds to an Static HTTP request.
 func (s *staticHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.fileServer.ServeHTTP(w, r)
 }
