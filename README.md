@@ -150,21 +150,6 @@ route.Prefix("/admin").Group(func(group *router.Route) {
 })
 ```
 
-## Middleware
-
-Middleware provide a convenient mechanism for filtering HTTP requests entering your application. You only need to implement  the `Middleware` interface.
-
-```go
-route.Get("/foo", func(request *context.Request) *context.Response {
-	return thinkgo.Text("Hello ThinkGo !")
-}).Middleware(func(request *context.Request, next router.Closure) interface{} {
-	if _, err := request.Input("name"); err != nil {
-		return thinkgo.Text("Invalid parameters")
-	}
-	return next(request)
-})
-```
-
 #### Route Groups
 
 Route groups allow you to share route attributes, such as middleware or prefix, across a large number of routes without needing to define those attributes on each individual route.
@@ -195,6 +180,51 @@ route.Prefix("/admin").Group(func(group *router.Route) {
 	}
 	return next(request)
 })
+```
+
+## Middleware
+
+Middleware provide a convenient mechanism for filtering HTTP requests entering your application. You only need to implement the `Middleware` interface.
+
+```go
+route.Get("/foo", func(request *context.Request) *context.Response {
+	return thinkgo.Text("Hello ThinkGo !")
+}).Middleware(func(request *context.Request, next router.Closure) interface{} {
+	if _, err := request.Input("name"); err != nil {
+		return thinkgo.Text("Invalid parameters")
+	}
+	return next(request)
+})
+```
+
+#### Before Middleware
+
+Whether a middleware runs before or after a request depends on the middleware itself. For example, the following middleware would perform some task `before` the request is handled by the application:
+
+```go
+func(request *context.Request, next router.Closure) interface{} {
+	
+	// Perform action	
+	// ...
+	
+	return next(request)
+}
+```
+
+#### After  Middleware
+
+However, this middleware would perform its task `after` the request is handled by the application:
+
+```go
+func(request *context.Request, next router.Closure) interface{} {
+	
+	response := next(request)
+	
+	// Perform action	
+	// ...
+	
+	return response
+}
 ```
 
 ## Controller
