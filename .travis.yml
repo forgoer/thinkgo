@@ -14,8 +14,8 @@ go:
 services:
   - redis-server
 
-script:
-  - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+before_install:
+  - go get github.com/mattn/goveralls
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+script:
+  - $HOME/gopath/bin/goveralls -service=travis-ci
