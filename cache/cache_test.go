@@ -1,13 +1,14 @@
 package cache
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
 )
 
-func testCache(t *testing.T, cache Store) {
+func testCache(t *testing.T, cache *Repository) {
 	var a int
 	var b string
 	err := cache.Get("a", &a)
@@ -40,12 +41,57 @@ func testCache(t *testing.T, cache Store) {
 	if b != "thinkgo" {
 		t.Error("Expect: ", "thinkgo")
 	}
+
+	testCacheRemember(t, cache)
+}
+
+func testCacheRemember(t *testing.T, cache *Repository) {
+	cache.Clear()
+
+	var a int
+
+	err := cache.Remember("a", &a, 1*time.Minute, func() interface{} {
+		return 1
+	})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if a != 1 {
+		t.Error(fmt.Sprintf("Expect: %d, Actual: %d ", 1, a))
+	}
+
+	err = cache.Remember("a", &a, 1*time.Minute, func() interface{} {
+		return 2
+	})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if a != 1 {
+		t.Error(fmt.Sprintf("Expect: %d, Actual: %d ", 1, a))
+	}
+
+	cache.Clear()
+	err = cache.Remember("a", &a, 1*time.Minute, func() interface{} {
+		return 3
+	})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if a != 3 {
+		t.Error(fmt.Sprintf("Expect: %d, Actual: %d ", 3, a))
+	}
 }
 
 func TestMemoryCache(t *testing.T) {
 	Register("memory", NewMemoryStore("thinkgo"))
 
-	cache, err := NewCache("memory")
+	cache, err := Cache("memory")
 
 	if err != nil {
 		t.Error(err)
@@ -69,7 +115,7 @@ func TestRedisCache(t *testing.T) {
 		},
 	}
 
-	cache, err := NewCache(NewRedisStore(pool, "thinkgo"))
+	cache, err := Cache(NewRedisStore(pool, "thinkgo"))
 	if err != nil {
 		t.Error(err)
 	}
