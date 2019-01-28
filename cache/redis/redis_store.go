@@ -13,6 +13,7 @@ type Store struct {
 	prefix string
 }
 
+// NewStore Create a redis cache store
 func NewStore(pool *redis.Pool, prefix string) *Store {
 	s := Store{}
 	return s.SetPool(pool).SetPrefix(prefix)

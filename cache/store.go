@@ -22,6 +22,7 @@ type Store interface {
 
 var adapters = make(map[string]Store)
 
+// Register Register a cache adapter available by the adapter name.
 func Register(name string, adapter Store) error {
 	if adapter == nil {
 		return errors.New("cache: Register adapter is nil")
@@ -33,6 +34,7 @@ func Register(name string, adapter Store) error {
 	return nil
 }
 
+// NewCache Create a new cache by adapter name.
 func NewCache(adapter interface{}) (Store, error) {
 	var store Store
 	switch adapter.(type) {

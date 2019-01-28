@@ -28,6 +28,7 @@ type Store struct {
 	cleanupTimer *time.Timer
 }
 
+// NewStore Create a memory cache store
 func NewStore(prefix string) *Store {
 	s := &Store{
 		items: make(map[string]Item),

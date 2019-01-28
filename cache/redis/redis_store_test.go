@@ -25,14 +25,6 @@ func GetPool() *redis.Pool {
 			if err != nil {
 				return nil, err
 			}
-			if _, err := c.Do("AUTH", 123456); err != nil {
-				c.Close()
-				return nil, err
-			}
-			if _, err := c.Do("SELECT", 0); err != nil {
-				c.Close()
-				return nil, err
-			}
 			return c, nil
 		},
 	}
