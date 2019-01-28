@@ -32,7 +32,7 @@ func TestMemoryStore(t *testing.T) {
 	}
 
 	s.Put("a", 1, 10*time.Minute)
-	s.Put("b", "thinkgo", 10*time.Minute)
+	s.Put("b", "thinkgo", 2*time.Minute)
 
 	err = s.Get("a", &a)
 	if err != nil {

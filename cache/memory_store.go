@@ -150,8 +150,13 @@ func (s *MemoryStore) DeleteExpired() {
 		} else {
 			// Find the item chronologically closest to its end-of-lifespan.
 			sub := item.Expiration - time.Now().UnixNano()
-			if time.Duration(sub)*time.Nanosecond < smallestDuration {
-				smallestDuration = time.Duration(sub) * time.Nanosecond
+
+			if smallestDuration == 0{
+				smallestDuration = time.Duration(sub)*time.Nanosecond
+			}else{
+				if time.Duration(sub)*time.Nanosecond < smallestDuration {
+					smallestDuration = time.Duration(sub) * time.Nanosecond
+				}
 			}
 		}
 	}
