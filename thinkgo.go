@@ -31,7 +31,6 @@ func BootStrap() *ThinkGo {
 		App: application,
 	}
 	think.bootView()
-	think.bootSession()
 	think.bootRoute()
 	return think
 }
@@ -48,6 +47,11 @@ func (think *ThinkGo) RegisterConfig(register registerConfigFunc) {
 	register()
 }
 
+// RegisterConfig Register Config
+func (think *ThinkGo) RegisterHandler(handler app.HandlerFunc) {
+	think.handlers = append(think.handlers, handler)
+}
+
 // Run thinkgo application.
 // Run() default run on HttpPort
 // Run("localhost")
@@ -59,8 +63,10 @@ func (think *ThinkGo) Run(params ...string) {
 
 	var addrs = helper.ParseAddr(params...)
 
-	pipeline := NewPipeline()
+	// register route handler
+	think.RegisterHandler(app.NewRouteHandler)
 
+	pipeline := NewPipeline()
 	for _, h := range think.handlers {
 		pipeline.Pipe(h(think.App))
 	}
@@ -87,13 +93,8 @@ func (think *ThinkGo) bootView() {
 	think.App.RegisterView(v)
 }
 
-func (think *ThinkGo) bootSession() {
-	think.handlers = append(think.handlers, app.NewSessionHandler)
-}
-
 func (think *ThinkGo) bootRoute() {
 	r := router.NewRoute()
 	r.Statics(config.Route.Static)
 	think.App.RegisterRoute(r)
-	think.handlers = append(think.handlers, app.NewRouteHandler)
 }

@@ -6,86 +6,75 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	"github.com/stretchr/testify/assert"
 )
+
+type Foo struct {
+	Name string `json:"name"`
+	Age int `json:"age"`
+}
 
 func testCache(t *testing.T, cache *Repository) {
 	var a int
 	var b string
-	err := cache.Get("a", &a)
-	if err == nil {
-		t.Error("Getting A found value that shouldn't exist:", a)
-	}
-
-	err = cache.Get("b", &b)
-	if err == nil {
-		t.Error("Getting B found value that shouldn't exist:", b)
-	}
-
-	cache.Put("a", 1, 10*time.Minute)
-	cache.Put("b", "thinkgo", 10*time.Minute)
-
-	err = cache.Get("a", &a)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if a != 1 {
-		t.Error("Expect: ", 1)
-	}
-
-	err = cache.Get("b", &b)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if b != "thinkgo" {
-		t.Error("Expect: ", "thinkgo")
-	}
-
-	testCacheRemember(t, cache)
-}
-
-func testCacheRemember(t *testing.T, cache *Repository) {
-	cache.Clear()
-
-	var a int
-
-	err := cache.Remember("a", &a, 1*time.Minute, func() interface{} {
-		return 1
-	})
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if a != 1 {
-		t.Error(fmt.Sprintf("Expect: %d, Actual: %d ", 1, a))
-	}
-
-	err = cache.Remember("a", &a, 1*time.Minute, func() interface{} {
-		return 2
-	})
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if a != 1 {
-		t.Error(fmt.Sprintf("Expect: %d, Actual: %d ", 1, a))
-	}
+	var c Foo
 
 	cache.Clear()
-	err = cache.Remember("a", &a, 1*time.Minute, func() interface{} {
-		return 3
-	})
 
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Error(t, cache.Get("a", &a))
+	assert.Error(t, cache.Get("b", &b))
 
-	if a != 3 {
-		t.Error(fmt.Sprintf("Expect: %d, Actual: %d ", 3, a))
-	}
+	assert.NoError(t, cache.Put("a", 1, 10*time.Minute))
+	assert.NoError(t, cache.Put("b", "thinkgo", 10*time.Minute))
+
+	assert.True(t, cache.Has("a"))
+	assert.True(t, cache.Has("b"))
+
+	assert.NoError(t, cache.Get("a", &a))
+	assert.Equal(t, a, 1)
+	assert.NoError(t, cache.Get("b", &b))
+	assert.Equal(t, b, "thinkgo")
+
+	assert.NoError(t, cache.Pull("b", &b))
+	assert.Equal(t, b, "thinkgo")
+	assert.False(t, cache.Has("b"))
+
+	assert.NoError(t, cache.Set("b", "think go", 10*time.Minute))
+	assert.Error(t, cache.Add("b", "think go", 10*time.Minute))
+
+	assert.True(t, cache.Has("b"))
+	assert.NoError(t, cache.Forget("b"))
+	assert.False(t, cache.Has("b"))
+
+	assert.NoError(t, cache.Put("c", Foo{
+		Name: "thinkgo",
+		Age:100,
+	}, 10*time.Minute))
+	assert.NoError(t,cache.Get("c", &c))
+	fmt.Println(c)
+	assert.Equal(t, c.Name , "thinkgo")
+	assert.Equal(t, c.Age , 100)
+	assert.NoError(t, cache.Delete("c"))
+	assert.False(t, cache.Has("c"))
+
+	_, ok := cache.GetStore().(Store)
+	assert.True(t, ok)
+
+	assert.NoError(t, cache.Clear())
+	assert.False(t, cache.Has("a"))
+	assert.False(t, cache.Has("b"))
+
+	assert.NoError(t, cache.Remember("a", &a, 1*time.Minute, func() interface{} {
+		return 1000
+	}))
+
+	assert.Equal(t, a, 1000)
+
+	assert.NoError(t,cache.Remember("b", &b, 1*time.Minute, func() interface{} {
+		return "hello thinkgo"
+	}))
+
+	assert.Equal(t, b, "hello thinkgo")
 }
 
 func TestMemoryCache(t *testing.T) {
@@ -111,6 +100,10 @@ func TestRedisCache(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
+			// if _, err := c.Do("AUTH", "123456"); err != nil {
+			// 	c.Close()
+			// 	return nil, err
+			// }
 			return c, nil
 		},
 	}
