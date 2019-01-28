@@ -5,9 +5,7 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/thinkoner/thinkgo/cache/memory"
 )
-import redisStore "github.com/thinkoner/thinkgo/cache/redis"
 
 func testCache(t *testing.T, cache Store) {
 	var a int
@@ -45,7 +43,7 @@ func testCache(t *testing.T, cache Store) {
 }
 
 func TestMemoryCache(t *testing.T) {
-	Register("memory", memory.NewStore("thinkgo"))
+	Register("memory", NewMemoryStore("thinkgo"))
 
 	cache, err := NewCache("memory")
 
@@ -71,7 +69,7 @@ func TestRedisCache(t *testing.T) {
 		},
 	}
 
-	cache, err := NewCache(redisStore.NewStore(pool, "thinkgo"))
+	cache, err := NewCache(NewRedisStore(pool, "thinkgo"))
 	if err != nil {
 		t.Error(err)
 	}

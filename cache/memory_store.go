@@ -1,4 +1,4 @@
-package memory
+package cache
 
 import (
 	"errors"
@@ -8,37 +8,37 @@ import (
 	"time"
 )
 
-type Item struct {
+type item struct {
 	Object     interface{}
 	Expiration int64
 }
 
 // Expired Returns true if the item has expired.
-func (item Item) Expired() bool {
+func (item item) Expired() bool {
 	if item.Expiration == 0 {
 		return false
 	}
 	return time.Now().UnixNano() > item.Expiration
 }
 
-type Store struct {
+type MemoryStore struct {
 	prefix       string
-	items        map[string]Item
+	items        map[string]item
 	mu           sync.RWMutex
 	cleanupTimer *time.Timer
 }
 
 // NewStore Create a memory cache store
-func NewStore(prefix string) *Store {
-	s := &Store{
-		items: make(map[string]Item),
+func NewMemoryStore(prefix string) *MemoryStore {
+	s := &MemoryStore{
+		items: make(map[string]item),
 	}
 	return s.SetPrefix(prefix)
 }
 
 // Get get cached value by key.
 // func (s *Store) Get(key string) (interface{}, error) {
-func (s *Store) Get(key string, val interface{}) error {
+func (s *MemoryStore) Get(key string, val interface{}) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -64,7 +64,7 @@ func (s *Store) Get(key string, val interface{}) error {
 }
 
 // Put set cached value with key and expire time.
-func (s *Store) Put(key string, val interface{}, timeout time.Duration) error {
+func (s *MemoryStore) Put(key string, val interface{}, timeout time.Duration) error {
 	var e int64
 	if timeout > 0 {
 		e = time.Now().Add(timeout).UnixNano()
@@ -73,7 +73,7 @@ func (s *Store) Put(key string, val interface{}, timeout time.Duration) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	s.items[s.prefix+key] = Item{
+	s.items[s.prefix+key] = item{
 		Object:     val,
 		Expiration: e,
 	}
@@ -86,7 +86,7 @@ func (s *Store) Put(key string, val interface{}, timeout time.Duration) error {
 }
 
 // Exist check cache's existence in memory.
-func (s *Store) Exist(key string) bool {
+func (s *MemoryStore) Exist(key string) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -100,28 +100,28 @@ func (s *Store) Exist(key string) bool {
 }
 
 // Forget Remove an item from the cache.
-func (s *Store) Forget(key string) error {
+func (s *MemoryStore) Forget(key string) error {
 	delete(s.items, s.prefix+key)
 	return nil
 }
 
 // Remove all items from the cache.
-func (s *Store) Flush() error {
+func (s *MemoryStore) Flush() error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	s.items = map[string]Item{}
+	s.items = map[string]item{}
 
 	return nil
 }
 
 // GetPrefix Get the cache key prefix.
-func (s *Store) GetPrefix() string {
+func (s *MemoryStore) GetPrefix() string {
 	return s.prefix
 }
 
 // SetPrefix Set the cache key prefix.
-func (s *Store) SetPrefix(prefix string) *Store {
+func (s *MemoryStore) SetPrefix(prefix string) *MemoryStore {
 	if len(prefix) != 0 {
 		s.prefix = fmt.Sprintf("%s:", prefix)
 	} else {
@@ -131,7 +131,7 @@ func (s *Store) SetPrefix(prefix string) *Store {
 }
 
 // Delete all expired items from the cache.
-func (s *Store) DeleteExpired() {
+func (s *MemoryStore) DeleteExpired() {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

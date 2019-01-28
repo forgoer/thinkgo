@@ -20,13 +20,13 @@ func main() {
 	var foo string 
 	
 	// Create a cache with memory store
-	cache, _ := cache.NewCache(memory.NewStore("thinkgo"))
+	c, _ := cache.NewCache(cache.NewMemoryStore("thinkgo"))
 	
 	// Set the value
-    cache.Put("foo", "thinkgo", 10 * time.Minute)
+    c.Put("foo", "thinkgo", 10 * time.Minute)
 	
 	// Get the string associated with the key "foo" from the cache
-	cache.Get("foo", &foo)
+	c.Get("foo", &foo)
 }
 ```
 

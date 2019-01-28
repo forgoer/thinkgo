@@ -13,6 +13,9 @@ type Store interface {
 	// Put set cached value with key and expire time.
 	Put(key string, val interface{}, timeout time.Duration) error
 
+	// Exist check cache's existence in redis.
+	Exist(key string) bool
+
 	// Forget Remove an item from the cache.
 	Forget(key string) error
 

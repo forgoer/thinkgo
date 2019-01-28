@@ -1,4 +1,4 @@
-package memory
+package cache
 
 import (
 	"errors"
@@ -11,13 +11,12 @@ type CacheUser struct {
 	Age  int
 }
 
-
-func getStore() *Store {
-	return NewStore("cache")
+func getMemoryStore() *MemoryStore {
+	return NewMemoryStore("cache")
 }
 
-func TestStore(t *testing.T) {
-	s := getStore()
+func TestMemoryStore(t *testing.T) {
+	s := getMemoryStore()
 	var a int
 	var b string
 	var c CacheUser
@@ -28,7 +27,7 @@ func TestStore(t *testing.T) {
 	}
 
 	err = s.Get("b", &b)
-	if err == nil{
+	if err == nil {
 		t.Error("Getting B found value that shouldn't exist:", b)
 	}
 
@@ -40,7 +39,7 @@ func TestStore(t *testing.T) {
 		t.Error(err)
 	}
 
-	if a != 1{
+	if a != 1 {
 		t.Error("Expect: ", 1)
 	}
 
@@ -49,7 +48,7 @@ func TestStore(t *testing.T) {
 		t.Error(err)
 	}
 
-	if b != "thinkgo"{
+	if b != "thinkgo" {
 		t.Error("Expect: ", "thinkgo")
 	}
 
@@ -72,8 +71,8 @@ func TestStore(t *testing.T) {
 	t.Logf("user:name=%s,age=%d", c.Name, c.Age)
 }
 
-func TestStoreDuration(t *testing.T)  {
-	s := getStore()
+func TestMemoryStoreDuration(t *testing.T) {
+	s := getMemoryStore()
 	var a int
 
 	s.Put("a", 3, 20*time.Millisecond)
@@ -85,9 +84,8 @@ func TestStoreDuration(t *testing.T)  {
 	}
 }
 
-
-func TestStoreForgetAndExist(t *testing.T) {
-	s := getStore()
+func TestMemoryStoreForgetAndExist(t *testing.T) {
+	s := getMemoryStore()
 	err := s.Put("forget", "Forget me", 10*time.Minute)
 	if err != nil {
 		t.Error(err)
@@ -109,8 +107,8 @@ func TestStoreForgetAndExist(t *testing.T) {
 	}
 }
 
-func TestStoreFlush(t *testing.T) {
-	s := getStore()
+func TestMemoryStoreFlush(t *testing.T) {
+	s := getMemoryStore()
 	err := s.Put("Flush", "Flush all", 10*time.Minute)
 	if err != nil {
 		t.Error(err)

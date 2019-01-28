@@ -1,4 +1,4 @@
-package redis
+package cache
 
 import (
 	"errors"
@@ -7,11 +7,6 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 )
-
-type CacheUser struct {
-	Name string
-	Age  int
-}
 
 func GetPool() *redis.Pool {
 	return &redis.Pool{
@@ -30,13 +25,13 @@ func GetPool() *redis.Pool {
 	}
 }
 
-func getStore() *Store {
+func getRedisStore() *RedisStore {
 	pool := GetPool()
-	return NewStore(pool, "cache")
+	return NewRedisStore(pool, "cache")
 }
 
-func TestStoreInt(t *testing.T) {
-	s := getStore()
+func TestRedisStoreInt(t *testing.T) {
+	s := getRedisStore()
 	err := s.Put("int", 9811, 10*time.Minute)
 	if err != nil {
 		t.Error(err)
@@ -52,8 +47,8 @@ func TestStoreInt(t *testing.T) {
 	t.Logf("int:%d", v)
 }
 
-func TestStoreString(t *testing.T) {
-	s := getStore()
+func TestRedisStoreString(t *testing.T) {
+	s := getRedisStore()
 	err := s.Put("str", "this is a string", 10*time.Minute)
 	if err != nil {
 		t.Error(err)
@@ -70,7 +65,7 @@ func TestStoreString(t *testing.T) {
 }
 
 func TestStoreStruct(t *testing.T) {
-	s := getStore()
+	s := getRedisStore()
 	err := s.Put(
 		"user", CacheUser{
 			Name: "alice",
@@ -92,8 +87,8 @@ func TestStoreStruct(t *testing.T) {
 	t.Logf("user:name=%s,age=%d", user.Name, user.Age)
 }
 
-func TestStoreForgetAndExist(t *testing.T) {
-	s := getStore()
+func TestRedisStoreForgetAndExist(t *testing.T) {
+	s := getRedisStore()
 	err := s.Put("forget", "Forget me", 10*time.Minute)
 	if err != nil {
 		t.Error(err)
@@ -115,8 +110,8 @@ func TestStoreForgetAndExist(t *testing.T) {
 	}
 }
 
-func TestStoreFlush(t *testing.T) {
-	s := getStore()
+func TestRedisStoreFlush(t *testing.T) {
+	s := getRedisStore()
 	err := s.Put("Flush", "Flush all", 10*time.Minute)
 	if err != nil {
 		t.Error(err)

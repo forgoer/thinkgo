@@ -1,4 +1,4 @@
-package redis
+package cache
 
 import (
 	"encoding/json"
@@ -8,19 +8,19 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-type Store struct {
+type RedisStore struct {
 	pool   *redis.Pool // redis connection pool
 	prefix string
 }
 
 // NewStore Create a redis cache store
-func NewStore(pool *redis.Pool, prefix string) *Store {
-	s := Store{}
+func NewRedisStore(pool *redis.Pool, prefix string) *RedisStore {
+	s := RedisStore{}
 	return s.SetPool(pool).SetPrefix(prefix)
 }
 
 // Get get cached value by key.
-func (s *Store) Get(key string, val interface{}) error {
+func (s *RedisStore) Get(key string, val interface{}) error {
 	c := s.pool.Get()
 	defer c.Close()
 
@@ -33,7 +33,7 @@ func (s *Store) Get(key string, val interface{}) error {
 }
 
 // Put set cached value with key and expire time.
-func (s *Store) Put(key string, val interface{}, timeout time.Duration) error {
+func (s *RedisStore) Put(key string, val interface{}, timeout time.Duration) error {
 	b, err := json.Marshal(val)
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func (s *Store) Put(key string, val interface{}, timeout time.Duration) error {
 }
 
 // Exist check cache's existence in redis.
-func (s *Store) Exist(key string) bool {
+func (s *RedisStore) Exist(key string) bool {
 	c := s.pool.Get()
 	defer c.Close()
 	v, err := redis.Bool(c.Do("EXISTS", s.prefix+key))
@@ -56,7 +56,7 @@ func (s *Store) Exist(key string) bool {
 }
 
 // Forget Remove an item from the cache.
-func (s *Store) Forget(key string) error {
+func (s *RedisStore) Forget(key string) error {
 	c := s.pool.Get()
 	defer c.Close()
 	_, err := c.Do("DEL", s.prefix+key)
@@ -64,7 +64,7 @@ func (s *Store) Forget(key string) error {
 }
 
 // Remove all items from the cache.
-func (s *Store) Flush() error {
+func (s *RedisStore) Flush() error {
 	c := s.pool.Get()
 	defer c.Close()
 	keys, err := redis.Strings(c.Do("KEYS", s.prefix+"*"))
@@ -80,18 +80,18 @@ func (s *Store) Flush() error {
 }
 
 // SetPool Get the redis pool.
-func (s *Store) SetPool(pool *redis.Pool) *Store {
+func (s *RedisStore) SetPool(pool *redis.Pool) *RedisStore {
 	s.pool = pool
 	return s
 }
 
 // GetPrefix Get the cache key prefix.
-func (s *Store) GetPrefix() string {
+func (s *RedisStore) GetPrefix() string {
 	return s.prefix
 }
 
 // SetPrefix Set the cache key prefix.
-func (s *Store) SetPrefix(prefix string) *Store {
+func (s *RedisStore) SetPrefix(prefix string) *RedisStore {
 	if len(prefix) != 0 {
 		s.prefix = fmt.Sprintf("%s:", prefix)
 	} else {
