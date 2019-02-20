@@ -67,9 +67,24 @@ func (s *RedisStore) Forget(key string) error {
 func (s *RedisStore) Flush() error {
 	c := s.pool.Get()
 	defer c.Close()
-	keys, err := redis.Strings(c.Do("KEYS", s.prefix+"*"))
-	if err != nil {
-		return err
+
+	var err error
+	iter := 0
+	keys := []string{}
+
+	for {
+		arr, err := redis.Values(c.Do("SCAN", iter, "MATCH", s.prefix+"*"))
+		if err != nil {
+			return  err
+		}
+
+		iter, _ = redis.Int(arr[0], nil)
+		k, _ := redis.Strings(arr[1], nil)
+		keys = append(keys, k...)
+
+		if iter == 0 {
+			break
+		}
 	}
 	for _, key := range keys {
 		if _, err = c.Do("DEL", key); err != nil {
