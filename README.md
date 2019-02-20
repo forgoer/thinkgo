@@ -5,7 +5,14 @@
 <p align="center">
 	<strong>ThinkGo is a lightweight MVC framework written in Go (Golang).</strong>
 </p>
-
+<p align="center">
+	<a href="https://www.travis-ci.org/thinkoner/thinkgo">
+		<img src="https://www.travis-ci.org/thinkoner/thinkgo.svg?branch=master" alt="Build Status">
+  	</a>
+  	<a href="https://coveralls.io/github/thinkoner/thinkgo">
+        <img src="https://coveralls.io/repos/github/thinkoner/thinkgo/badge.svg" alt="Coverage Status">
+    </a>
+</p>
 <p align="center">
 	<a href="https://goreportcard.com/report/github.com/thinkoner/thinkgo">
 		<img src="https://goreportcard.com/badge/github.com/thinkoner/thinkgo" alt="Go Report Card">
