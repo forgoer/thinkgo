@@ -4,7 +4,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/thinkoner/thinkgo/log/formatter"
 	"github.com/thinkoner/thinkgo/log/record"
 )
 
@@ -18,7 +17,7 @@ func newBrush(color string) brush {
 	}
 }
 
-var colors = map[int]brush{
+var colors = map[record.Level]brush{
 	record.EMERGENCY: newBrush("1;41"), // Emergency          Red background
 	record.ALERT:     newBrush("1;35"), // Alert              purple
 	record.CRITICAL:  newBrush("1;34"), // Critical           blue
@@ -30,15 +29,16 @@ var colors = map[int]brush{
 }
 
 type ConsoleHandler struct {
+	Handler
 	sync.Mutex
-	level     int
-	formatter formatter.Formatter
-	bubble    bool
+	level record.Level
+
+	bubble bool
 }
 
-func NewConsoleHandler() *ConsoleHandler {
+func NewConsoleHandler(level record.Level) *ConsoleHandler {
 	return &ConsoleHandler{
-		level:  record.DEBUG,
+		level:  level,
 		bubble: true,
 	}
 }
@@ -66,22 +66,4 @@ func (h *ConsoleHandler) write(r record.Record) {
 	defer h.Unlock()
 	message := colors[r.Level](r.Formatted)
 	os.Stdout.Write(append([]byte(message)))
-}
-
-// GetFormatter Gets the formatter.
-func (h *ConsoleHandler) GetFormatter() formatter.Formatter {
-	if h.formatter == nil {
-		h.formatter = h.getDefaultFormatter()
-	}
-	return h.formatter
-}
-
-// SetFormatter Sets the formatter.
-func (h *ConsoleHandler) SetFormatter(f formatter.Formatter) *ConsoleHandler {
-	h.formatter = f
-	return h
-}
-
-func (h *ConsoleHandler) getDefaultFormatter() formatter.Formatter {
-	return formatter.NewLineFormatter()
 }

@@ -1,9 +1,13 @@
 package log
 
+import (
+	"github.com/thinkoner/thinkgo/log/record"
+)
+
 var logger *Logger
 
 func init() {
-	logger = NewLogger("develop")
+	logger = NewLogger("develop", record.DEBUG)
 }
 
 // Debug Adds a log record at the DEBUG level.
@@ -44,4 +48,14 @@ func Alert(format string, v ...interface{}) (bool, error) {
 // Emerg Adds a log record at the EMERGENCY level.
 func Emerg(format string, v ...interface{}) (bool, error) {
 	return logger.Emerg(format, v...)
+}
+
+// GetLogger Get the default Logger
+func GetLogger() *Logger {
+	return logger
+}
+
+// SetLogger Set the default Logger
+func SetLogger(l *Logger) {
+	logger = l
 }

@@ -17,13 +17,16 @@ type Handler interface {
 
 type Logger struct {
 	name     string
+	level    record.Level
 	handlers *list.List
 }
 
-func NewLogger(name string) *Logger {
+// NewLogger New a Logger instance
+func NewLogger(name string, level record.Level) *Logger {
 	logger := &Logger{
 		name:     name,
 		handlers: list.New(),
+		level:    level,
 	}
 	return logger
 }
@@ -71,9 +74,10 @@ func (logger *Logger) GetHandlers() []Handler {
 	return handler
 }
 
-func (logger *Logger) AddRecord(level int, format string, v ...interface{}) (bool, error) {
+// AddRecord Adds a log record.
+func (logger *Logger) AddRecord(level record.Level, format string, v ...interface{}) (bool, error) {
 	if logger.handlers.Len() == 0 {
-		logger.PushHandler(handler.NewConsoleHandler())
+		logger.PushHandler(handler.NewConsoleHandler(logger.level))
 	}
 
 	levelName, err := GetLevelName(level)
@@ -156,7 +160,7 @@ func (logger *Logger) Emerg(format string, v ...interface{}) (bool, error) {
 }
 
 // Gets the name of the logging level.
-func GetLevelName(level int) (string, error) {
+func GetLevelName(level record.Level) (string, error) {
 	levels := record.GetLevels()
 	l, ok := levels[level]
 	if !ok {

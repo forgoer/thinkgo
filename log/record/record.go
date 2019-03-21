@@ -2,6 +2,8 @@ package record
 
 import "time"
 
+type Level int
+
 const (
 	// Detailed debug information
 	DEBUG = 100
@@ -22,7 +24,7 @@ const (
 )
 
 // Logging levels from syslog protocol defined in RFC 5424
-var levels = map[int]string{
+var levels = map[Level]string{
 	DEBUG:     "DEBUG",
 	INFO:      "INFO",
 	NOTICE:    "NOTICE",
@@ -34,7 +36,7 @@ var levels = map[int]string{
 }
 
 type Record struct {
-	Level     int
+	Level     Level
 	Message   string
 	LevelName string
 	Channel   string
@@ -43,6 +45,6 @@ type Record struct {
 }
 
 // GetLevels returns levels map
-func GetLevels() map[int]string {
+func GetLevels() map[Level]string {
 	return levels
 }
