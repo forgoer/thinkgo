@@ -30,7 +30,7 @@ func NewFileHandler(filename string, level record.Level) *FileHandler {
 		filenameFormat: "{filename}-{date}",
 		dateFormat:     "2006-01-02",
 	}
-	h.timedFilename = h.GetTimedFilename()
+	// h.timedFilename = h.GetTimedFilename()
 	return h
 }
 
@@ -60,7 +60,7 @@ func (h *FileHandler) SetLevel(level record.Level) {
 func (h *FileHandler) write(r record.Record) {
 	h.Lock()
 	defer h.Unlock()
-	file, _ := os.OpenFile(h.timedFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	file, _ := os.OpenFile(h.GetTimedFilename(), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	defer file.Close()
 	file.Write([]byte(r.Formatted))
 }
