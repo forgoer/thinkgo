@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	"github.com/pkg/errors"
+	"errors"
 )
 
 type Repository struct {
