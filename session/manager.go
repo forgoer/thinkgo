@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+var customHandlers map[string]Handler
+
 type Config struct {
 	//Default Session Driver
 	Driver string
@@ -21,21 +23,21 @@ type Config struct {
 }
 
 type Manager struct {
-	store  *Store
-	Config *Config
+	store          *Store
+	Config         *Config
 }
 
 func NewManager(config *Config) *Manager {
 	m := &Manager{
 		Config: config,
 	}
-	m.store = m.buildSession(
-		m.parseStoreHandler(),
-	)
+
 	return m
 }
 
 func (m *Manager) SessionStart(req Request) *Store {
+	m.parseStore()
+
 	if handler, ok := m.usingCookieSessions(); ok {
 		handler.SetRequest(req)
 	}
@@ -54,6 +56,13 @@ func (m *Manager) SessionSave(res Response) *Store {
 	return m.store
 }
 
+func Extend(driver string, handler Handler) {
+	if customHandlers == nil {
+		customHandlers = make(map[string]Handler)
+	}
+	customHandlers[driver] = handler
+}
+
 func (m *Manager) buildSession(handler Handler) *Store {
 	store := NewStore(m.Config.CookieName, handler)
 	return store
@@ -62,6 +71,16 @@ func (m *Manager) buildSession(handler Handler) *Store {
 func (m *Manager) usingCookieSessions() (handler *CookieHandler, ok bool) {
 	handler, ok = m.store.GetHandler().(*CookieHandler)
 	return
+}
+
+func (m *Manager) parseStore() {
+	if m.store != nil {
+		return
+	}
+
+	m.store = m.buildSession(
+		m.parseStoreHandler(),
+	)
 }
 
 func (m *Manager) parseStoreHandler() Handler {
@@ -75,7 +94,11 @@ func (m *Manager) parseStoreHandler() Handler {
 			Lifetime: m.Config.Lifetime,
 		}
 	default:
-		panic("Unsupported session driver: " + m.Config.Driver)
+		var ok bool
+		storeHandler, ok = customHandlers[m.Config.Driver]
+		if !ok {
+			panic("Unsupported session driver: " + m.Config.Driver)
+		}
 	}
 
 	return storeHandler

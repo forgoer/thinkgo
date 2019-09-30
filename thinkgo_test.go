@@ -31,16 +31,16 @@ func testRequest(t *testing.T, url string) {
 }
 
 func TestRunEmpty(t *testing.T) {
-	app := BootStrap()
+	think := BootStrap()
 
 	go func() {
-		app.RegisterRoute(func(route *router.Route) {
+		think.RegisterRoute(func(route *router.Route) {
 			route.Get("/", func(req *context.Request) *context.Response {
 				return Text("it worked")
 			})
 		})
 		// listen and serve on 0.0.0.0:9011
-		app.Run()
+		think.Run()
 	}()
 
 	time.Sleep(5 * time.Millisecond)
@@ -49,16 +49,16 @@ func TestRunEmpty(t *testing.T) {
 }
 
 func TestRunWithPort(t *testing.T) {
-	app := BootStrap()
+	think := BootStrap()
 
 	go func() {
-		app.RegisterRoute(func(route *router.Route) {
+		think.RegisterRoute(func(route *router.Route) {
 			route.Get("/", func(req *context.Request) *context.Response {
 				return Text("it worked")
 			})
 		})
 		// listen and serve on 0.0.0.0:9011
-		app.Run(":8100")
+		think.Run(":8100")
 	}()
 
 	time.Sleep(5 * time.Millisecond)

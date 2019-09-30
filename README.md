@@ -59,8 +59,8 @@ import (
 )
 
 func main() {
-	app := thinkgo.BootStrap()
-	app.RegisterRoute(func(route *router.Route) {
+	think := thinkgo.BootStrap()
+	think.RegisterRoute(func(route *router.Route) {
 
 		route.Get("/", func(req *context.Request) *context.Response {
 			return thinkgo.Text("Hello ThinkGo !")
@@ -78,7 +78,7 @@ func main() {
 		})
 	})
 	// listen and serve on 0.0.0.0:9011
-	app.Run()
+	think.Run()
 }
 ```
 
@@ -102,7 +102,7 @@ func main() {
 The most basic routes accept a URI and a Closure, providing a very simple and expressive method of defining routes:
 
 ```go
-app.RegisterRoute(func(route *router.Route) {
+think.RegisterRoute(func(route *router.Route) {
 	route.Get("/foo", func(req *context.Request) *context.Response {
 		return thinkgo.Text("Hello ThinkGo !")
 	})
@@ -381,6 +381,19 @@ route.Get("/tpl", func(request *context.Request) *context.Response {
 
 ## HTTP Session
 
+When the app starts, you need to register the session handler.
+
+```go
+think.RegisterHandler(app.NewSessionHandler)
+```
+
+`ThinkGo` ships with several great drivers out of the box:
+
+- cookie - sessions are stored in cookies
+- file - sessions are stored in files.
+
+#### Using The Session
+
 retrieving Data like this:
 
 ```go
@@ -391,6 +404,25 @@ storing Data like this:
 
 ```go
 request.Session().Set("user", "alice")
+```
+
+#### Adding Custom Session Drivers
+
+Your custom session driver should implement the `Handler`. 
+
+```go
+type Handler interface {
+	Read(id string) string
+	Write(id string, data string)
+}
+```
+
+Once your driver has been implemented, you are ready to register it:
+
+```go
+import "github.com/thinkoner/thinkgo/session"
+
+session.Extend("my_session", MySessionHandler)
 ```
 
 ## Logging

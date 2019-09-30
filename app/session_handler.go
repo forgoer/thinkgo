@@ -7,14 +7,14 @@ import (
 )
 
 type SessionHandler struct {
-	manager *session.Manager
+	Manager *session.Manager
 	app     *Application
 }
 
 // SessionHandler The default SessionHandler
 func NewSessionHandler(app *Application) Handler {
 	handler := &SessionHandler{}
-	handler.manager = session.NewManager(&session.Config{
+	handler.Manager = session.NewManager(&session.Config{
 		Driver:     config.Session.Driver,
 		CookieName: config.Session.CookieName,
 		Lifetime:   config.Session.Lifetime,
@@ -42,9 +42,9 @@ func (h *SessionHandler) Process(req *context.Request, next Closure) interface{}
 }
 
 func (h *SessionHandler) startSession(req *context.Request) *session.Store {
-	return h.manager.SessionStart(req)
+	return h.Manager.SessionStart(req)
 }
 
 func (h *SessionHandler) saveSession(res session.Response) {
-	h.manager.SessionSave(res)
+	h.Manager.SessionSave(res)
 }
