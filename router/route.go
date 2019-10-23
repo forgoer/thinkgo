@@ -1,11 +1,11 @@
 package router
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"path"
 	"strings"
-
-	"github.com/thinkoner/thinkgo/log"
 )
 
 var verbs = []string{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
@@ -27,14 +27,15 @@ type Route struct {
 
 	collects []*Route
 
-	rules map[string][]*Rule
+	rules    map[string]map[string]*Rule
+	allRules map[string]*Rule
 	// Current    *Rule
 }
 
-// NewRoute Create a new Route instance.
-func NewRoute() *Route {
+// New Create a new Route instance.
+func New() *Route {
 	route := &Route{
-		rules: make(map[string][]*Rule),
+		rules: make(map[string]map[string]*Rule),
 	}
 	return route
 }
@@ -63,14 +64,25 @@ func (r *Route) Match(request Request) (*Rule, error) {
 
 // AddRule Add a Rule to the Router.Rules
 func (r *Route) AddRule(rule *Rule) *Rule {
-	var rules []*Rule
+	domainAndUri := rule.pattern
+	method := ""
+	for _, method = range rule.method {
 
-	for _, m := range rule.method {
-		if _, ok := r.rules[m]; ok {
-			rules = r.rules[m]
+		if _, ok := r.rules[method]; !ok {
+			r.rules[method] = map[string]*Rule{
+				domainAndUri: rule,
+			}
+		} else {
+			r.rules[method][domainAndUri] = rule
 		}
-		r.rules[m] = append(rules, rule)
+
 	}
+
+	if r.allRules == nil {
+		r.allRules = map[string]*Rule{}
+	}
+	r.allRules[method+domainAndUri] = rule
+
 	return rule
 }
 
@@ -170,6 +182,15 @@ func (r *Route) Register() {
 	r.register(r)
 }
 
+func (r *Route) Dump() []byte {
+	var b bytes.Buffer
+	for _, rule := range r.allRules {
+		fmt.Fprintf(&b, "%s %s %T \r\n", strings.Join(rule.method, "|"), rule.pattern, rule.handler)
+	}
+
+	return b.Bytes()
+}
+
 func (r *Route) register(root *Route) {
 	for _, route := range r.collects {
 		route.prefix = r.getPrefix(route.prefix)
@@ -196,7 +217,6 @@ func (r *Route) register(root *Route) {
 		}
 
 		root.AddRule(rule)
-		log.Debug(rule.toString())
 	}
 	r.collects = r.collects[0:0]
 }
@@ -207,7 +227,7 @@ func (r *Route) initRoute() *Route {
 	if !r.inited {
 		route = &Route{
 			inited: true,
-			rules:  make(map[string][]*Rule),
+			rules:  make(map[string]map[string]*Rule),
 			// prefix:      r.prefix,
 			// middlewares: r.middlewares,
 		}
@@ -219,7 +239,7 @@ func (r *Route) initRoute() *Route {
 func (r *Route) cloneRoute() *Route {
 	route := &Route{
 		inited: false,
-		rules:  make(map[string][]*Rule),
+		rules:  make(map[string]map[string]*Rule),
 		// prefix:      r.prefix,
 		// middlewares: r.middlewares,
 	}

@@ -52,33 +52,33 @@ go get -u github.com/thinkoner/thinkgo
 package main
 
 import (
-	"github.com/thinkoner/thinkgo"
-	"fmt"
-	"github.com/thinkoner/thinkgo/router"
-	"github.com/thinkoner/thinkgo/context"
+    "fmt"
+
+	"github.com/thinkoner/thinkgo"	
+	"github.com/thinkoner/thinkgo/think"
 )
 
 func main() {
-	think := thinkgo.BootStrap()
-	think.RegisterRoute(func(route *router.Route) {
+	th := thinkgo.New()
+	th.RegisterRoute(func(route *think.Route) {
 
-		route.Get("/", func(req *context.Request) *context.Response {
+		route.Get("/", func(req *think.Req) *think.Res {
 			return thinkgo.Text("Hello ThinkGo !")
 		})
 
-		route.Get("/ping", func(req *context.Request) *context.Response {
+		route.Get("/ping", func(req *think.Req) *think.Res {
 			return thinkgo.Json(map[string]string{
 				"message": "pong",
 		    })
 		})
 
 		// Dependency injection
-		route.Get("/user/{name}", func(req *context.Request, name string) *context.Response {
+		route.Get("/user/{name}", func(req *think.Req, name string) *think.Res {
 			return thinkgo.Text(fmt.Sprintf("Hello %s !", name))
 		})
 	})
 	// listen and serve on 0.0.0.0:9011
-	think.Run()
+	th.Run()
 }
 ```
 

@@ -2,15 +2,16 @@ package thinkgo
 
 import (
 	"container/list"
+	"html/template"
 	"net/http"
 
-	"github.com/thinkoner/thinkgo/app"
 	"github.com/thinkoner/thinkgo/context"
 	"github.com/thinkoner/thinkgo/router"
+	"github.com/thinkoner/thinkgo/think"
 )
 
 type Pipeline struct {
-	handlers []app.Handler
+	handlers []think.Handler
 	pipeline *list.List
 	passable *context.Request
 }
@@ -24,13 +25,13 @@ func NewPipeline() *Pipeline {
 }
 
 // Pipe Push a Middleware Handler to the pipeline
-func (p *Pipeline) Pipe(m app.Handler) *Pipeline {
+func (p *Pipeline) Pipe(m think.Handler) *Pipeline {
 	p.pipeline.PushBack(m)
 	return p
 }
 
 // Pipe Batch push Middleware Handlers to the pipeline
-func (p *Pipeline) Through(hls []app.Handler) *Pipeline {
+func (p *Pipeline) Through(hls []think.Handler) *Pipeline {
 	for _, hl := range hls {
 		p.Pipe(hl)
 	}
@@ -64,10 +65,16 @@ func (p *Pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch result.(type) {
 	case router.Response:
 		result.(router.Response).Send(w)
-		return
+		break
+	case template.HTML:
+		think.Html(string(result.(template.HTML))).Send(w)
+		break
 	case http.Handler:
 		result.(http.Handler).ServeHTTP(w, r)
-		return
+		break
+	default:
+		think.Response(result).Send(w)
+		break
 	}
 }
 
@@ -75,12 +82,12 @@ func (p *Pipeline) handler(passable *context.Request, e *list.Element) interface
 	if e == nil {
 		return nil
 	}
-	hl := e.Value.(app.Handler)
+	hl := e.Value.(think.Handler)
 	result := hl.Process(passable, p.closure(e))
 	return result
 }
 
-func (p *Pipeline) closure(e *list.Element) app.Closure {
+func (p *Pipeline) closure(e *list.Element) think.Closure {
 	return func(req *context.Request) interface{} {
 		e = e.Next()
 		return p.handler(req, e)

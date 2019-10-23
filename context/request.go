@@ -1,7 +1,9 @@
 package context
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -230,6 +232,21 @@ func (r *Request) Path() string {
 // Method get the current method for the request.
 func (r *Request) Method() string {
 	return r.method
+}
+
+// GetContent Returns the request body content.
+func (r *Request) GetContent() ([]byte, error) {
+	var body []byte
+
+	if body == nil {
+		body, err := ioutil.ReadAll(r.Request.Body)
+		if err != nil {
+			return nil, err
+		}
+		r.Request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	}
+
+	return body, nil
 }
 
 // Session get the session associated with the request.

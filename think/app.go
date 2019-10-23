@@ -1,19 +1,23 @@
-package app
+package think
 
 import (
+	"github.com/thinkoner/thinkgo/log"
 	"github.com/thinkoner/thinkgo/router"
 	"github.com/thinkoner/thinkgo/view"
 )
 
 // Application the ThinkGo Application
 type Application struct {
-	view  *view.View
-	route *router.Route
+	Env    string
+	Debug  bool
+	Logger *log.Logger
+	view   *view.View
+	route  *router.Route
 }
 
 // NewApplication returns a new ThinkGo Application
 func NewApplication() *Application {
-	return &Application{}
+	return &Application{Env: "production"}
 }
 
 // RegisterRoute Register Route for Application

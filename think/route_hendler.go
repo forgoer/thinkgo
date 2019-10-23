@@ -1,4 +1,4 @@
-package app
+package think
 
 import (
 	"github.com/thinkoner/thinkgo/context"

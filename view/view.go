@@ -4,53 +4,43 @@ import (
 	"bytes"
 	"html/template"
 	"path"
-	"strings"
-
-	"github.com/thinkoner/thinkgo/filesystem"
-	"github.com/thinkoner/thinkgo/helper"
 )
 
+// the default View.
+var view = &View{}
+
 type View struct {
-	path string
-	// Engine
+	tmpl *template.Template
 }
 
-func NewView() *View {
+func New() *View {
 	v := &View{}
 	return v
 }
 
-func (v *View) SetPath(path string) {
-	path = helper.WorkPath(path)
-
-	v.path = strings.TrimRight(path, "/") + "/"
+// ParseGlob creates a new Template and parses the template definitions from the
+// files identified by the pattern, which must match at least one file.
+func (v *View) ParseGlob(pattern string) {
+	v.tmpl = template.Must(template.ParseGlob(pattern))
 }
 
-func (v *View) loadEngine() {
-
-}
-
-func (v *View) Render(name string, data interface{}) []byte {
-	file := name
-
-	if e, _ := filesystem.Exists(file); !e {
-		file = path.Join(v.path, name)
+func (v *View) Render(name string, data interface{}) template.HTML {
+	tmpl := v.tmpl
+	if tmpl == nil {
+		pattern := path.Join(path.Dir(name), "*")
+		name = path.Base(name)
+		tmpl = template.Must(template.ParseGlob(pattern))
 	}
-
-	t := template.New("")
-	if _, err := t.ParseGlob(path.Join(v.path, "*")); err != nil {
-		panic(err)
-	}
-
-	tmpl, err := t.ParseFiles(file)
-	if err != nil {
-		panic(err)
-		// return context.ErrorResponse()
-	}
-
 	var buf bytes.Buffer
-
 	tmpl.ExecuteTemplate(&buf, name, data)
 
-	return buf.Bytes()
+	return template.HTML(buf.String())
+}
+
+func Render(name string, data interface{}) template.HTML {
+	return view.Render(name, data)
+}
+
+func ParseGlob(pattern string) {
+	view.tmpl = template.Must(template.ParseGlob(pattern))
 }

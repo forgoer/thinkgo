@@ -94,33 +94,26 @@ func NewResponse() *Response {
 	r := &Response{
 		Header: &http.Header{},
 	}
+	r.SetCode(http.StatusOK)
 	r.SetContentType("text/html")
 	r.SetCharset("utf-8")
-	r.SetCode(http.StatusOK)
 	r.CookieHandler = ParseCookieHandler()
 	return r
 }
 
 // NotFoundResponse Create a new HTTP NotFoundResponse
 func NotFoundResponse() *Response {
-	r := NewResponse()
-	r.SetContent("Not Found")
-	r.SetCode(http.StatusNotFound)
-	return r
+	return NewResponse().SetCode(http.StatusNotFound).SetContent("Not Found")
 }
 
 // NotFoundResponse Create a new HTTP Error Response
 func ErrorResponse() *Response {
-	r := NewResponse()
-	r.SetContent("Server Error")
-	r.SetCode(http.StatusInternalServerError)
-	return r
+	return NewResponse().SetCode(http.StatusInternalServerError).SetContent("Server Error")
 }
 
 // Redirect Create a new HTTP Redirect Response
 func Redirect(to string) *Response {
-	r := NewResponse()
+	r := NewResponse().SetCode(http.StatusMovedPermanently)
 	r.Header.Set("Location", to)
-	r.SetCode(http.StatusMovedPermanently)
 	return r
 }

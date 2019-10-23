@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -16,7 +15,7 @@ type Rule struct {
 	pattern        string
 	handler        interface{}
 	parameterNames []string
-	parameters     map[string]string
+	parameters     []*parameter
 	Compiled       *Compiled
 }
 
@@ -53,10 +52,13 @@ func (r *Rule) Bind(path string) {
 		return
 	}
 
-	parameters := make(map[string]string)
+	parameters := make([]*parameter, 0)
 
 	for k, v := range parameterNames {
-		parameters[v] = matches[k]
+		parameters = append(parameters, &parameter{
+			name:  v,
+			value: matches[k],
+		})
 	}
 
 	r.parameters = parameters
@@ -76,20 +78,23 @@ func (r *Rule) GatherRouteMiddleware() []Middleware {
 }
 
 // Run Run the route action and return the response.
-func (r *Rule) Run(request *context.Request) interface{} {
-	handler := r.handler
+func (r *Rule) Run(request *context.Request) (result interface{}) {
+	if r.handler == nil {
+		return
+	}
 
-	if handler != nil {
-		t := reflect.TypeOf(handler)
-		switch t.Kind() {
-		case reflect.Func:
-			v := reflect.ValueOf(handler).Call(
-				parseParams(request, r.parameters),
-			)
-			handler = v[0].Interface()
+	v := reflect.ValueOf(r.handler)
+	switch v.Type().Kind() {
+	case reflect.Func:
+		in := parseParams(v, request, r.parameters)
+		out := v.Call(in)
+
+		if len(out) > 0 {
+			result = out[0].Interface()
 		}
 	}
-	return handler
+
+	return
 }
 
 // getParameterNames Get all of the parameter names for the rule.
@@ -129,17 +134,34 @@ func (r *Rule) compileParameterNames() []string {
 	return result
 }
 
-func (r *Rule) toString() string {
-	return fmt.Sprint(r.method) + ": " + r.pattern
-}
-
-func parseParams(request *context.Request, parameters map[string]string) []reflect.Value {
-	var params []reflect.Value
-	params = append(params, reflect.ValueOf(request))
-
-	for _, v := range parameters {
-		params = append(params, reflect.ValueOf(v))
+func parseParams(value reflect.Value, request *context.Request, parameters []*parameter) []reflect.Value {
+	valueType := value.Type()
+	needNum := valueType.NumIn()
+	if needNum < 1 {
+		return nil
 	}
 
-	return params
+	in := make([]reflect.Value, 0, needNum)
+	t := valueType.In(0)
+	k := t.Kind()
+	ptr := reflect.Ptr == k
+	if ptr {
+		k = t.Elem().Kind()
+	}
+	if k == reflect.ValueOf(request).Elem().Kind() {
+		var v reflect.Value
+		if ptr {
+			v = reflect.ValueOf(request)
+		} else {
+			v = reflect.ValueOf(request).Elem()
+		}
+		in = append(in, v)
+		needNum--
+	}
+
+	for _, p := range parameters {
+		in = append(in, reflect.ValueOf(p.value))
+	}
+
+	return in
 }
