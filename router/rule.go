@@ -92,6 +92,8 @@ func (r *Rule) Run(request *context.Request) (result interface{}) {
 		if len(out) > 0 {
 			result = out[0].Interface()
 		}
+	default:
+		result = r.handler
 	}
 
 	return
