@@ -64,6 +64,10 @@ func (r *Repository) Remember(key string, val interface{}, timeout time.Duration
 	}
 
 	value := callback()
+	if err, ok := value.(error); ok {
+		return err
+	}
+
 	r.Put(key, value, timeout)
 
 	return r.Get(key, val)
