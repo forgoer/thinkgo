@@ -342,6 +342,12 @@ route.Get("/redirect", func(request *context.Request) *context.Response {
 
 ## View
 
+Specify the `views` directory before running the app:
+
+```go
+view.ParseGlob("/path/to/views/*")
+```
+
 views are stored in the `views` directory, A simple view might look something like this:
 
 `views/layout.html` like this:
@@ -375,7 +381,7 @@ we may return it using the `Render` function like so:
 ```go
 route.Get("/tpl", func(request *context.Request) *context.Response {
 	data := map[string]interface{}{"Title": "ThinkGo", "Message": "Hello ThinkGo !"}
-	return thinkgo.Render("tpl.html", data)
+	return view.Render("tpl.html", data)
 })
 ```
 
