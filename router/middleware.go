@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/thinkoner/thinkgo/context"
+	"github.com/forgoer/thinkgo/context"
 )
 
 // Response an HTTP response interface

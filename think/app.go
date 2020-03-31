@@ -1,9 +1,9 @@
 package think
 
 import (
-	"github.com/thinkoner/thinkgo/log"
-	"github.com/thinkoner/thinkgo/router"
-	"github.com/thinkoner/thinkgo/view"
+	"github.com/forgoer/thinkgo/log"
+	"github.com/forgoer/thinkgo/router"
+	"github.com/forgoer/thinkgo/view"
 )
 
 // Application the ThinkGo Application

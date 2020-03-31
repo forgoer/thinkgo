@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/thinkoner/thinkgo/log/record"
+	"github.com/forgoer/thinkgo/log/record"
 )
 
 type FileHandler struct {

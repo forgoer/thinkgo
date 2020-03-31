@@ -1,6 +1,6 @@
 package formatter
 
-import "github.com/thinkoner/thinkgo/log/record"
+import "github.com/forgoer/thinkgo/log/record"
 
 type Formatter interface {
 	Format(r record.Record) string

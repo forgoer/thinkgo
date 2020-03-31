@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/thinkoner/thinkgo/log/record"
+	"github.com/forgoer/thinkgo/log/record"
 )
 
 func TestNewFileHandler(t *testing.T) {

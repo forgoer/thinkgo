@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/thinkoner/thinkgo/log/handler"
-	"github.com/thinkoner/thinkgo/log/record"
+	"github.com/forgoer/thinkgo/log/handler"
+	"github.com/forgoer/thinkgo/log/record"
 )
 
 type Handler interface {

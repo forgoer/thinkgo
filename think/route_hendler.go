@@ -1,8 +1,8 @@
 package think
 
 import (
-	"github.com/thinkoner/thinkgo/context"
-	"github.com/thinkoner/thinkgo/router"
+	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/router"
 )
 
 type RouteHandler struct {

@@ -5,9 +5,9 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/thinkoner/thinkgo/context"
-	"github.com/thinkoner/thinkgo/router"
-	"github.com/thinkoner/thinkgo/think"
+	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/router"
+	"github.com/forgoer/thinkgo/think"
 )
 
 type Pipeline struct {

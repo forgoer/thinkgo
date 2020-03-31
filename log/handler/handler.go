@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/thinkoner/thinkgo/log/formatter"
-	"github.com/thinkoner/thinkgo/log/record"
+	"github.com/forgoer/thinkgo/log/formatter"
+	"github.com/forgoer/thinkgo/log/record"
 )
 
 type Handler struct {

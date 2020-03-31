@@ -5,7 +5,7 @@
 ## Installation
 
 ```
-go get github.com/thinkoner/thinkgo/cache
+go get github.com/forgoer/thinkgo/cache
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ go get github.com/thinkoner/thinkgo/cache
 
 ```go
 import (
-	"github.com/thinkoner/thinkgo/cache"
+	"github.com/forgoer/thinkgo/cache"
 	"time"
 )
 

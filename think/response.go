@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/thinkoner/thinkgo/context"
+	"github.com/forgoer/thinkgo/context"
 )
 
 // Json Create a new HTTP Response with JSON data

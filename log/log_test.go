@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thinkoner/thinkgo/log/handler"
-	"github.com/thinkoner/thinkgo/log/record"
+	"github.com/forgoer/thinkgo/log/handler"
+	"github.com/forgoer/thinkgo/log/record"
 )
 
 func TestLog(t *testing.T) {

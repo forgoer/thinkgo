@@ -3,7 +3,7 @@ package thinkgo
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/thinkoner/thinkgo/context"
+	"github.com/forgoer/thinkgo/context"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thinkoner/thinkgo/think"
+	"github.com/forgoer/thinkgo/think"
 )
 
 func testRequest(t *testing.T, method, url string, data url.Values, res *think.Res) {

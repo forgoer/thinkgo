@@ -2,7 +2,7 @@ package think
 
 import (
 	"fmt"
-	"github.com/thinkoner/thinkgo/context"
+	"github.com/forgoer/thinkgo/context"
 	"net/http/httputil"
 	"runtime"
 	"strings"

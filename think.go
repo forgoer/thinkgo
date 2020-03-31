@@ -2,16 +2,16 @@ package thinkgo
 
 import (
 	"fmt"
-	"github.com/thinkoner/thinkgo/log"
-	"github.com/thinkoner/thinkgo/log/record"
+	"github.com/forgoer/thinkgo/log"
+	"github.com/forgoer/thinkgo/log/record"
 	"net/http"
 
 	"time"
 
-	"github.com/thinkoner/thinkgo/config"
-	"github.com/thinkoner/thinkgo/helper"
-	"github.com/thinkoner/thinkgo/router"
-	"github.com/thinkoner/thinkgo/think"
+	"github.com/forgoer/thinkgo/config"
+	"github.com/forgoer/thinkgo/helper"
+	"github.com/forgoer/thinkgo/router"
+	"github.com/forgoer/thinkgo/think"
 )
 
 type registerRouteFunc func(route *router.Route)
