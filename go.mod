@@ -1,8 +1,8 @@
 module github.com/forgoer/thinkgo
 
-go 1.11
+go 1.14
 
 require (
-	github.com/gomodule/redigo/redis v0.0.0-20200429221454-e14091dffc1b
+	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/stretchr/testify v1.5.1
 )
