@@ -88,6 +88,11 @@ func (r *Repository) Clear() error {
 	return r.store.Flush()
 }
 
+// TTL get the ttl of the key.
+func (r *Repository) TTL(key string) (int64, error) {
+	return r.store.TTL(key)
+}
+
 // GetStore Get the cache store implementation.
 func (r *Repository) GetStore() Store {
 	return r.store

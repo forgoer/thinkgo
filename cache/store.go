@@ -19,5 +19,8 @@ type Store interface {
 
 	// Flush Remove all items from the cache.
 	Flush() error
+
+	// TTL get the ttl of the key.
+	TTL(key string) (int64, error)
 }
 

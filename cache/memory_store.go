@@ -115,6 +115,22 @@ func (s *MemoryStore) Flush() error {
 	return nil
 }
 
+func (s *MemoryStore) TTL(key string) (int64, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	item, ok := s.items[s.prefix+key]
+	if !ok {
+		return 0, errors.New("not found")
+	}
+
+	if item.Expired() {
+		return 0, errors.New("not found")
+	}
+
+	return item.Expiration - time.Now().UnixNano(), nil
+}
+
 // GetPrefix Get the cache key prefix.
 func (s *MemoryStore) GetPrefix() string {
 	return s.prefix
@@ -151,9 +167,9 @@ func (s *MemoryStore) DeleteExpired() {
 			// Find the item chronologically closest to its end-of-lifespan.
 			sub := item.Expiration - time.Now().UnixNano()
 
-			if smallestDuration == 0{
-				smallestDuration = time.Duration(sub)*time.Nanosecond
-			}else{
+			if smallestDuration == 0 {
+				smallestDuration = time.Duration(sub) * time.Nanosecond
+			} else {
 				if time.Duration(sub)*time.Nanosecond < smallestDuration {
 					smallestDuration = time.Duration(sub) * time.Nanosecond
 				}

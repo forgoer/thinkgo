@@ -75,7 +75,7 @@ func (s *RedisStore) Flush() error {
 	for {
 		arr, err := redis.Values(c.Do("SCAN", iter, "MATCH", s.prefix+"*"))
 		if err != nil {
-			return  err
+			return err
 		}
 
 		iter, _ = redis.Int(arr[0], nil)
@@ -92,6 +92,13 @@ func (s *RedisStore) Flush() error {
 		}
 	}
 	return err
+}
+
+func (s *RedisStore) TTL(key string) (int64, error) {
+	c := s.pool.Get()
+	defer c.Close()
+
+	return redis.Int64(c.Do("TTL", s.prefix+key))
 }
 
 // SetPool Get the redis pool.
