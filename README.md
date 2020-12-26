@@ -63,18 +63,18 @@ func main() {
 	th.RegisterRoute(func(route *think.Route) {
 
 		route.Get("/", func(req *think.Req) *think.Res {
-			return thinkgo.Text("Hello ThinkGo !")
+			return think.Text("Hello ThinkGo !")
 		})
 
 		route.Get("/ping", func(req *think.Req) *think.Res {
-			return thinkgo.Json(map[string]string{
+			return think.Json(map[string]string{
 				"message": "pong",
 		    })
 		})
 
 		// Dependency injection
 		route.Get("/user/{name}", func(req *think.Req, name string) *think.Res {
-			return thinkgo.Text(fmt.Sprintf("Hello %s !", name))
+			return think.Text(fmt.Sprintf("Hello %s !", name))
 		})
 	})
 	// listen and serve on 0.0.0.0:9011
