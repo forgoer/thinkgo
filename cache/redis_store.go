@@ -44,6 +44,32 @@ func (s *RedisStore) Put(key string, val interface{}, timeout time.Duration) err
 	return err
 }
 
+// Increment the value of an item in the cache.
+func (s *RedisStore) Increment(key string, value ...int) (int, error) {
+	c := s.pool.Get()
+	defer c.Close()
+
+	var by = 1
+	if len(value) > 0 {
+		by = value[0]
+	}
+
+	return redis.Int(c.Do("INCRBY", s.prefix+key, by))
+}
+
+// Decrement the value of an item in the cache.
+func (s *RedisStore) Decrement(key string, value ...int) (int, error) {
+	c := s.pool.Get()
+	defer c.Close()
+
+	var by = 1
+	if len(value) > 0 {
+		by = value[0]
+	}
+
+	return redis.Int(c.Do("DECRBY", s.prefix+key, by))
+}
+
 // Exist check cache's existence in redis.
 func (s *RedisStore) Exist(key string) bool {
 	c := s.pool.Get()
@@ -53,6 +79,15 @@ func (s *RedisStore) Exist(key string) bool {
 		return false
 	}
 	return v
+}
+
+// Expire set value expire time.
+func (s *RedisStore) Expire(key string, timeout time.Duration) error {
+	c := s.pool.Get()
+	defer c.Close()
+	_, err := c.Do("EXPIRE", s.prefix+key, int64(timeout/time.Second))
+
+	return err
 }
 
 // Forget Remove an item from the cache.

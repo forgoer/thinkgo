@@ -85,6 +85,54 @@ func (s *MemoryStore) Put(key string, val interface{}, timeout time.Duration) er
 	return nil
 }
 
+// Increment the value of an item in the cache.
+func (s *MemoryStore) Increment(key string, value ...int) (int, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var by = 1
+	if len(value) > 0 {
+		by = value[0]
+	}
+
+	exist, ok := s.items[s.prefix+key]
+	if !ok {
+		s.items[s.prefix+key] = item{
+			Object: 1 + by,
+		}
+	} else {
+		by = exist.Object.(int) + by
+		exist.Object = by
+		s.items[s.prefix+key] = exist
+	}
+
+	return by, nil
+}
+
+// Decrement the value of an item in the cache.
+func (s *MemoryStore) Decrement(key string, value ...int) (int, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	var by = 1
+	if len(value) > 0 {
+		by = value[0]
+	}
+
+	exist, ok := s.items[s.prefix+key]
+	if !ok {
+		s.items[s.prefix+key] = item{
+			Object: 0 - by,
+		}
+	} else {
+		by = exist.Object.(int) - by
+		exist.Object = by
+		s.items[s.prefix+key] = exist
+	}
+
+	return by, nil
+}
+
 // Exist check cache's existence in memory.
 func (s *MemoryStore) Exist(key string) bool {
 	s.mu.RLock()
@@ -97,6 +145,31 @@ func (s *MemoryStore) Exist(key string) bool {
 	}
 
 	return ok
+}
+
+// Expire set value expire time.
+func (s *MemoryStore) Expire(key string, timeout time.Duration) error {
+	var e int64
+	if timeout > 0 {
+		e = time.Now().Add(timeout).UnixNano()
+	}
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	if !s.Exist(key) {
+		return errors.New("key not exist")
+	}
+
+	item := s.items[s.prefix+key]
+	item.Expiration = e
+	s.items[s.prefix+key] = item
+
+	if e > 0 {
+		s.DeleteExpired()
+	}
+
+	return nil
 }
 
 // Forget Remove an item from the cache.

@@ -56,6 +56,21 @@ func (r *Repository) Add(key string, val interface{}, timeout time.Duration) err
 	return r.store.Put(key, val, timeout)
 }
 
+// Increment the value of an item in the cache.
+func (r *Repository) Increment(key string, value ...int) (int, error) {
+	return r.store.Increment(key, value...)
+}
+
+// Decrement the value of an item in the cache.
+func (r *Repository) Decrement(key string, value ...int) (int, error) {
+	return r.store.Decrement(key, value...)
+}
+
+// Expire set value expire time.
+func (r *Repository) Expire(key string, timeout time.Duration) error {
+	return r.store.Expire(key, timeout)
+}
+
 // Remember Get an item from the cache, or store the default value.
 func (r *Repository) Remember(key string, val interface{}, timeout time.Duration, callback func() interface{}) error {
 	err := r.Get(key, val)
