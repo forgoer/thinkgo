@@ -17,6 +17,9 @@ type Store interface {
 	// Decrement the value of an item in the cache.
 	Decrement(key string, value ...int) (int, error)
 
+	// Forever Store an item in the cache indefinitely.
+	Forever(key string, val interface{}) error
+
 	// Exist check cache's existence in redis.
 	Exist(key string) bool
 
@@ -28,6 +31,8 @@ type Store interface {
 
 	// Flush Remove all items from the cache.
 	Flush() error
+
+	Tags(names ...string) Store
 
 	// TTL get the ttl of the key.
 	TTL(key string) (int64, error)

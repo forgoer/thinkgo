@@ -3,17 +3,25 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
 )
 
+// ReferenceKeyForever Forever reference key.
+const ReferenceKeyForever = "forever_ref"
+
+// ReferenceKeyStandard Standard reference key.
+const ReferenceKeyStandard = "standard_ref"
+
 type RedisStore struct {
 	pool   *redis.Pool // redis connection pool
+	tagSet *TagSet
 	prefix string
 }
 
-// NewStore Create a redis cache store
+// NewRedisStore Create a redis cache store
 func NewRedisStore(pool *redis.Pool, prefix string) *RedisStore {
 	s := RedisStore{}
 	return s.SetPool(pool).SetPrefix(prefix)
@@ -38,6 +46,12 @@ func (s *RedisStore) Put(key string, val interface{}, timeout time.Duration) err
 	if err != nil {
 		return err
 	}
+
+	err = s.pushStandardKeys(key)
+	if err != nil {
+		return err
+	}
+
 	c := s.pool.Get()
 	defer c.Close()
 	_, err = c.Do("SETEX", s.prefix+key, int64(timeout/time.Second), string(b))
@@ -46,6 +60,11 @@ func (s *RedisStore) Put(key string, val interface{}, timeout time.Duration) err
 
 // Increment the value of an item in the cache.
 func (s *RedisStore) Increment(key string, value ...int) (int, error) {
+	err := s.pushStandardKeys(key)
+	if err != nil {
+		return 0, err
+	}
+
 	c := s.pool.Get()
 	defer c.Close()
 
@@ -59,6 +78,11 @@ func (s *RedisStore) Increment(key string, value ...int) (int, error) {
 
 // Decrement the value of an item in the cache.
 func (s *RedisStore) Decrement(key string, value ...int) (int, error) {
+	err := s.pushStandardKeys(key)
+	if err != nil {
+		return 0, err
+	}
+
 	c := s.pool.Get()
 	defer c.Close()
 
@@ -68,6 +92,24 @@ func (s *RedisStore) Decrement(key string, value ...int) (int, error) {
 	}
 
 	return redis.Int(c.Do("DECRBY", s.prefix+key, by))
+}
+
+// Forever Store an item in the cache indefinitely.
+func (s *RedisStore) Forever(key string, val interface{}) error {
+	b, err := json.Marshal(val)
+	if err != nil {
+		return err
+	}
+
+	err = s.pushForeverKeys(key)
+	if err != nil {
+		return err
+	}
+
+	c := s.pool.Get()
+	defer c.Close()
+	_, err = c.Do("SET", s.prefix+key, string(b))
+	return err
 }
 
 // Exist check cache's existence in redis.
@@ -100,6 +142,26 @@ func (s *RedisStore) Forget(key string) error {
 
 // Remove all items from the cache.
 func (s *RedisStore) Flush() error {
+	if s.tagSet != nil {
+		err := s.deleteForeverKeys()
+		if err != nil {
+			return err
+		}
+		err = s.deleteStandardKeys()
+		if err != nil {
+			return err
+		}
+		err = s.tagSet.Reset()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return s.flush()
+}
+
+func (s *RedisStore) flush() error {
 	c := s.pool.Get()
 	defer c.Close()
 
@@ -121,12 +183,34 @@ func (s *RedisStore) Flush() error {
 			break
 		}
 	}
-	for _, key := range keys {
-		if _, err = c.Do("DEL", key); err != nil {
-			return err
+
+	length := len(keys)
+	if length == 0 {
+		return nil
+	}
+
+	var keysChunk []interface{}
+	for i, key := range keys {
+		keysChunk = append(keysChunk, key)
+		if i == length-1 || len(keysChunk) == 1000 {
+			_, err = c.Do("DEL", keysChunk...)
+			if err != nil {
+				return err
+			}
 		}
 	}
-	return err
+
+	return nil
+}
+
+func (s *RedisStore) Tags(names ...string) Store {
+	if len(names) == 0 {
+		return s
+	}
+	ss := s.clone()
+	ss.tagSet = NewTagSet(s, names)
+
+	return ss
 }
 
 func (s *RedisStore) TTL(key string) (int64, error) {
@@ -155,4 +239,109 @@ func (s *RedisStore) SetPrefix(prefix string) *RedisStore {
 		s.prefix = ""
 	}
 	return s
+}
+
+func (s *RedisStore) clone() *RedisStore {
+	return &RedisStore{
+		pool:   s.pool,
+		prefix: s.prefix,
+	}
+}
+
+func (s *RedisStore) pushStandardKeys(key string) error {
+	return s.pushKeys(key, ReferenceKeyStandard)
+}
+
+func (s *RedisStore) pushForeverKeys(key string) error {
+	return s.pushKeys(key, ReferenceKeyForever)
+}
+
+func (s *RedisStore) pushKeys(key, reference string) error {
+	if s.tagSet == nil {
+		return nil
+	}
+
+	namespace, err := s.tagSet.GetNamespace()
+	if err != nil {
+		return err
+	}
+
+	fullKey := s.prefix + key
+	segments := strings.Split(namespace, "|")
+
+	c := s.pool.Get()
+	defer c.Close()
+	for _, segment := range segments {
+		_, err = c.Do("SADD", s.referenceKey(segment, reference), fullKey)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *RedisStore) deleteStandardKeys() error {
+	return s.deleteKeysByReference(ReferenceKeyStandard)
+}
+
+func (s *RedisStore) deleteForeverKeys() error {
+	return s.deleteKeysByReference(ReferenceKeyForever)
+}
+
+func (s *RedisStore) deleteKeysByReference(reference string) error {
+	if s.tagSet == nil {
+		return nil
+	}
+
+	namespace, err := s.tagSet.GetNamespace()
+	if err != nil {
+		return err
+	}
+	segments := strings.Split(namespace, "|")
+	c := s.pool.Get()
+	defer c.Close()
+
+	for _, segment := range segments {
+		segment = s.referenceKey(segment, reference)
+		err = s.deleteKeys(segment)
+		if err != nil {
+			return err
+		}
+		_, err = c.Do("DEL", segment)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *RedisStore) deleteKeys(referenceKey string) error {
+	c := s.pool.Get()
+	defer c.Close()
+	keys, err := redis.Strings(c.Do("SMEMBERS", referenceKey))
+	if err != nil {
+		return err
+	}
+	var length = len(keys)
+	if length == 0 {
+		return nil
+	}
+
+	var keysChunk []interface{}
+	for i, key := range keys {
+		keysChunk = append(keysChunk, key)
+		if i == length-1 || len(keysChunk) == 1000 {
+			_, err = c.Do("DEL", keysChunk...)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *RedisStore) referenceKey(segment, suffix string) string {
+	return s.prefix + segment + ":" + suffix
 }

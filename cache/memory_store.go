@@ -15,7 +15,7 @@ type item struct {
 
 // Expired Returns true if the item has expired.
 func (item item) Expired() bool {
-	if item.Expiration == 0 {
+	if item.Expiration < 0 {
 		return false
 	}
 	return time.Now().UnixNano() > item.Expiration
@@ -65,8 +65,8 @@ func (s *MemoryStore) Get(key string, val interface{}) error {
 
 // Put set cached value with key and expire time.
 func (s *MemoryStore) Put(key string, val interface{}, timeout time.Duration) error {
-	var e int64
-	if timeout > 0 {
+	var e int64 = -1
+	if timeout >= 0 {
 		e = time.Now().Add(timeout).UnixNano()
 	}
 
@@ -78,7 +78,7 @@ func (s *MemoryStore) Put(key string, val interface{}, timeout time.Duration) er
 		Expiration: e,
 	}
 
-	if e > 0 {
+	if e >= 0 {
 		s.DeleteExpired()
 	}
 
@@ -133,6 +133,11 @@ func (s *MemoryStore) Decrement(key string, value ...int) (int, error) {
 	return by, nil
 }
 
+// Forever Store an item in the cache indefinitely.
+func (s *MemoryStore) Forever(key string, val interface{}) error {
+	return s.Put(key, val, 0)
+}
+
 // Exist check cache's existence in memory.
 func (s *MemoryStore) Exist(key string) bool {
 	s.mu.RLock()
@@ -149,8 +154,8 @@ func (s *MemoryStore) Exist(key string) bool {
 
 // Expire set value expire time.
 func (s *MemoryStore) Expire(key string, timeout time.Duration) error {
-	var e int64
-	if timeout > 0 {
+	var e int64 = -1
+	if timeout >= 0 {
 		e = time.Now().Add(timeout).UnixNano()
 	}
 
@@ -165,7 +170,7 @@ func (s *MemoryStore) Expire(key string, timeout time.Duration) error {
 	item.Expiration = e
 	s.items[s.prefix+key] = item
 
-	if e > 0 {
+	if e >= 0 {
 		s.DeleteExpired()
 	}
 
@@ -186,6 +191,11 @@ func (s *MemoryStore) Flush() error {
 	s.items = map[string]item{}
 
 	return nil
+}
+
+func (s *MemoryStore) Tags(names ...string) Store {
+	// tags not be supported
+	return s
 }
 
 func (s *MemoryStore) TTL(key string) (int64, error) {
@@ -230,7 +240,7 @@ func (s *MemoryStore) DeleteExpired() {
 
 	smallestDuration := 0 * time.Nanosecond
 	for key, item := range s.items {
-		if item.Expiration == 0 {
+		if item.Expiration < 0 {
 			continue
 		}
 		// "Inlining" of expired

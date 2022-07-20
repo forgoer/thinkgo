@@ -103,6 +103,11 @@ func (r *Repository) Clear() error {
 	return r.store.Flush()
 }
 
+// Tags Begin executing a new tags operation if the store supports it.
+func (r *Repository) Tags(names ...string) *Repository {
+	return NewRepository(r.store.Tags(names...))
+}
+
 // TTL get the ttl of the key.
 func (r *Repository) TTL(key string) (int64, error) {
 	return r.store.TTL(key)
