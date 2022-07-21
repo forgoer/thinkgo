@@ -158,19 +158,19 @@ func (s *RedisStore) Flush() error {
 		return nil
 	}
 
-	return s.flush()
+	return s.FlushByPrefix("")
 }
 
-func (s *RedisStore) flush() error {
+func (s *RedisStore) FlushByPrefix(prefix string) error {
 	c := s.pool.Get()
 	defer c.Close()
 
 	var err error
 	iter := 0
 	keys := []string{}
-
+	pattern := s.prefix + prefix + "*"
 	for {
-		arr, err := redis.Values(c.Do("SCAN", iter, "MATCH", s.prefix+"*"))
+		arr, err := redis.Values(c.Do("SCAN", iter, "MATCH", pattern))
 		if err != nil {
 			return err
 		}
@@ -197,6 +197,7 @@ func (s *RedisStore) flush() error {
 			if err != nil {
 				return err
 			}
+			keysChunk = nil
 		}
 	}
 
@@ -336,6 +337,7 @@ func (s *RedisStore) deleteKeys(referenceKey string) error {
 			if err != nil {
 				return err
 			}
+			keysChunk = nil
 		}
 	}
 
