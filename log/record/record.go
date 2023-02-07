@@ -1,26 +1,29 @@
 package record
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 type Level int
 
 const (
-	// Detailed debug information
-	DEBUG = 100
-	// Interesting events
-	INFO = 200
-	// Uncommon events
-	NOTICE = 250
-	// Exceptional occurrences that are not errors
-	WARNING = 300
-	// Runtime errors
-	ERROR = 400
-	// Critical conditions
-	CRITICAL = 500
-	// Action must be taken immediately
-	ALERT = 550
-	// Urgent alert.
-	EMERGENCY = 600
+	// DEBUG Detailed debug information
+	DEBUG Level = 100
+	// INFO Interesting events
+	INFO Level = 200
+	// NOTICE Uncommon events
+	NOTICE Level = 250
+	// WARNING Exceptional occurrences that are not errors
+	WARNING Level = 300
+	// ERROR Runtime errors
+	ERROR Level = 400
+	// CRITICAL Critical conditions
+	CRITICAL Level = 500
+	// ALERT Action must be taken immediately
+	ALERT Level = 550
+	// EMERGENCY Urgent alert.
+	EMERGENCY Level = 600
 )
 
 // Logging levels from syslog protocol defined in RFC 5424
@@ -47,4 +50,14 @@ type Record struct {
 // GetLevels returns levels map
 func GetLevels() map[Level]string {
 	return levels
+}
+
+// GetLevel Parse the string level into a Level constant.
+func GetLevel(levelKey string) Level {
+	for level, s := range levels {
+		if strings.ToUpper(s) == s {
+			return level
+		}
+	}
+	return DEBUG
 }
