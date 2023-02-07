@@ -55,7 +55,7 @@ func GetLevels() map[Level]string {
 // GetLevel Parse the string level into a Level constant.
 func GetLevel(levelKey string) Level {
 	for level, s := range levels {
-		if strings.ToUpper(s) == s {
+		if strings.ToUpper(levelKey) == s {
 			return level
 		}
 	}
