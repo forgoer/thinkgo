@@ -1,20 +1,18 @@
 package handler
 
 import (
+	"github.com/forgoer/thinkgo/log/record"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/forgoer/thinkgo/log/record"
 )
 
-func TestNewFileHandler(t *testing.T) {
+func TestRotateHandler(t *testing.T) {
 	filename := path.Join(os.TempDir(), "thinkgo.log")
 
-	h := NewFileHandler(filename, record.DEBUG)
+	h := NewRotateHandler(filename, record.DEBUG)
 	filename = h.GetFilename()
 
 	os.Remove(filename)
@@ -33,14 +31,4 @@ func TestNewFileHandler(t *testing.T) {
 		t.Error("test FileHandler error")
 	}
 	t.Log(filename, content)
-}
-
-func getRecord(message string) record.Record {
-	return record.Record{
-		Level:     200,
-		Message:   message,
-		LevelName: "INFO",
-		Channel:   "testing",
-		Datetime:  time.Now(),
-	}
 }

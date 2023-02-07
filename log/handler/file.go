@@ -20,6 +20,8 @@ type FileHandler struct {
 	filenameFormat string
 	dateFormat     string
 	timedFilename  string
+
+	rotate bool
 }
 
 func NewFileHandler(filename string, level record.Level) *FileHandler {
@@ -60,12 +62,21 @@ func (h *FileHandler) SetLevel(level record.Level) {
 func (h *FileHandler) write(r record.Record) {
 	h.Lock()
 	defer h.Unlock()
-	file, _ := os.OpenFile(h.GetTimedFilename(), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	file, _ := os.OpenFile(h.GetFilename(), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	defer file.Close()
 	file.Write([]byte(r.Formatted))
 }
 
-// GetTimedFilename Gets the Timed filename.
+// GetFilename Gets the filename.
+func (h *FileHandler) GetFilename() string {
+	if !h.rotate {
+		return h.filename
+	}
+
+	return h.GetTimedFilename()
+}
+
+// GetTimedFilename Gets the timed filename.
 func (h *FileHandler) GetTimedFilename() string {
 	dirname := path.Dir(h.filename)
 	filename := path.Base(h.filename)
