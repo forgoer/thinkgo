@@ -1,26 +1,26 @@
-package think
+package middleware
 
 import (
 	"fmt"
-	"github.com/forgoer/thinkgo/context"
 	"net/http/httputil"
 	"runtime"
 	"strings"
+
+	. "github.com/forgoer/thinkgo/contracts"
+	"github.com/forgoer/thinkgo/ctx"
 )
 
-type RecoverHandler struct {
-	app *Application
+type Recover struct {
+	app Application
 }
 
-// NewRecoverHandler The default NewRecoverHandler
-func NewRecoverHandler(app *Application) Handler {
-	return &RecoverHandler{
-		app: app,
-	}
+// New The default Recover handler
+func (h *Recover) New(app Application) {
+	h.app = app
 }
 
-// Process Process the request to a router and return the response.
-func (h *RecoverHandler) Process(req *context.Request, next Closure) (result interface{}) {
+// Handle an incoming request.
+func (h *Recover) Handle(req *ctx.Request, next Next) (result interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			var stacktrace string
@@ -47,8 +47,8 @@ func (h *RecoverHandler) Process(req *context.Request, next Closure) (result int
 			logMessage += fmt.Sprintf("Trace: %s\n", err)
 			logMessage += fmt.Sprintf("\n%s", stacktrace)
 
-			response := context.ErrorResponse()
-			if h.app.Debug {
+			response := ctx.ErrorResponse()
+			if h.app.Debug() {
 				response.SetContent(logMessage)
 			}
 			result = response

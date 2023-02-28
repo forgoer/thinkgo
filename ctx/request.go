@@ -1,4 +1,4 @@
-package context
+package ctx
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//Request HTTP request
+// Request HTTP request
 type Request struct {
 	Request       *http.Request
 	method        string
@@ -21,7 +21,7 @@ type Request struct {
 	CookieHandler *Cookie
 }
 
-// NewRequest create a new HTTP request from *http.Request
+// NewRequest create a new HTTP request from *ctx.Request
 func NewRequest(req *http.Request) *Request {
 
 	return &Request{
@@ -43,12 +43,12 @@ func (r *Request) GetPath() string {
 	return r.path
 }
 
-// GetHttpRequest get Current *http.Request
+// GetHttpRequest get Current *ctx.Request
 func (r *Request) GetHttpRequest() *http.Request {
 	return r.Request
 }
 
-//IsMethod checks if the request method is of specified type.
+// IsMethod checks if the request method is of specified type.
 func (r *Request) IsMethod(m string) bool {
 	return strings.ToUpper(m) == r.GetMethod()
 }
@@ -92,7 +92,7 @@ func (r *Request) Post(key string, value ...string) (string, error) {
 	return "", errors.New("named post not present")
 }
 
-//Cookie Retrieve a cookie from the request.
+// Cookie Retrieve a cookie from the request.
 func (r *Request) Cookie(key string, value ...string) (string, error) {
 	var err error
 	key = r.CookieHandler.Config.Prefix + key
@@ -157,7 +157,7 @@ func (r *Request) All(keys ...string) map[string]string {
 	return result
 }
 
-//Only get a subset of the items from the input data.
+// Only get a subset of the items from the input data.
 func (r *Request) Only(keys ...string) map[string]string {
 	all := r.All()
 
@@ -172,7 +172,7 @@ func (r *Request) Only(keys ...string) map[string]string {
 	return result
 }
 
-//Except Get all of the input except for a specified array of items.
+// Except Get all of the input except for a specified array of items.
 func (r *Request) Except(keys ...string) map[string]string {
 	all := r.All()
 
@@ -214,7 +214,7 @@ func (r *Request) Has(keys ...string) bool {
 	return true
 }
 
-//Url get the URL (no query string) for the request.
+// Url get the URL (no query string) for the request.
 func (r *Request) Url() string {
 	return r.Request.URL.Path
 }

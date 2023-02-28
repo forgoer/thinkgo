@@ -1,4 +1,4 @@
-package context
+package ctx
 
 type Session interface {
 	Get(name string, value ...interface{}) interface{}

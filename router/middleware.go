@@ -1,9 +1,8 @@
 package router
 
 import (
+	"github.com/forgoer/thinkgo/ctx"
 	"net/http"
-
-	"github.com/forgoer/thinkgo/context"
 )
 
 // Response an HTTP response interface
@@ -12,8 +11,8 @@ type Response interface {
 }
 
 // Closure Anonymous function, Used in Middleware Handler
-type Closure func(req *context.Request) interface {
+type Closure func(req *ctx.Request) interface {
 }
 
 // MiddlewareFunc Handle an incoming request.
-type Middleware func(request *context.Request, next Closure) interface{}
+type Middleware func(request *ctx.Request, next Closure) interface{}

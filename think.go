@@ -2,53 +2,42 @@ package thinkgo
 
 import (
 	"fmt"
-	"github.com/forgoer/thinkgo/log"
-	"github.com/forgoer/thinkgo/log/record"
 	"net/http"
 
 	"time"
 
-	"github.com/forgoer/thinkgo/config"
+	"github.com/forgoer/thinkgo/contracts"
+
 	"github.com/forgoer/thinkgo/helper"
 	"github.com/forgoer/thinkgo/router"
-	"github.com/forgoer/thinkgo/think"
 )
 
-type registerRouteFunc func(route *router.Route)
-
-type registerConfigFunc func()
+type RouteFunc func(route *router.Route)
 
 type Think struct {
-	App      *think.Application
-	handlers []think.HandlerFunc
+	App      *Application
+	handlers []contracts.Middleware
 }
 
 // New Create The Application
 func New() *Think {
-	application := think.NewApplication()
-	application.Logger = log.NewLogger("develop", record.DEBUG)
+	application := NewApplication()
+
 	t := &Think{
 		App: application,
 	}
-	//t.bootView()
-	t.bootRoute()
 	return t
 }
 
-// RegisterRoute Register Route
-func (th *Think) RegisterRoute(register registerRouteFunc) {
-	route := th.App.GetRoute()
+// Route register Route
+func (th *Think) Route(register RouteFunc) {
+	route := th.App.Route()
 	defer route.Register()
 	register(route)
 }
 
 // RegisterConfig Register Config
-func (th *Think) RegisterConfig(register registerConfigFunc) {
-	register()
-}
-
-// RegisterConfig Register Config
-func (th *Think) RegisterHandler(handler think.HandlerFunc) {
+func (th *Think) RegisterHandler(handler contracts.Middleware) {
 	th.handlers = append(th.handlers, handler)
 }
 
@@ -63,20 +52,21 @@ func (th *Think) Run(params ...string) {
 
 	var addrs = helper.ParseAddr(params...)
 
-	// register route handler
-	th.RegisterHandler(think.NewRouteHandler)
-
-	pipeline := NewPipeline()
+	pl := NewPipeline()
 	for _, h := range th.handlers {
-		pipeline.Pipe(h(th.App))
+		h.New(th.App)
+		pl.Pipe(h)
 	}
 
-	th.App.Logger.Debug("\r\nLoaded routes:\r\n%s",string(th.App.GetRoute().Dump()))
+	// register route handler
+	pl.Then(th.dispatchToRouter())
+
+	th.App.Logger().Debug("\r\nLoaded routes:\r\n%s", string(th.App.Route().Dump()))
 
 	go func() {
-		th.App.Logger.Debug("ThinkGo server running on http://%s", addrs)
+		th.App.Logger().Debug("ThinkGo server running on http://%s", addrs)
 
-		err = http.ListenAndServe(addrs, pipeline)
+		err = http.ListenAndServe(addrs, pl)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -88,14 +78,15 @@ func (th *Think) Run(params ...string) {
 	<-endRunning
 }
 
+func (th *Think) dispatchToRouter() contracts.Middleware {
+	h := &routeDispatcher{}
+	h.New(th.App)
+
+	return h
+}
+
 //func (th *Think) bootView() {
 //	v := view.NewView()
 //	v.SetPath(config.View.Path)
 //	th.App.RegisterView(v)
 //}
-
-func (th *Think) bootRoute() {
-	r := router.New()
-	r.Statics(config.Route.Static)
-	th.App.RegisterRoute(r)
-}

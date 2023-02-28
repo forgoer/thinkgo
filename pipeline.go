@@ -5,15 +5,17 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/ctx"
+
+	"github.com/forgoer/thinkgo/contracts"
 	"github.com/forgoer/thinkgo/router"
 	"github.com/forgoer/thinkgo/think"
 )
 
 type Pipeline struct {
-	handlers []think.Handler
+	handlers []contracts.Middleware
 	pipeline *list.List
-	passable *context.Request
+	passable *ctx.Request
 }
 
 // Pipeline returns a new Pipeline
@@ -25,13 +27,13 @@ func NewPipeline() *Pipeline {
 }
 
 // Pipe Push a Middleware Handler to the pipeline
-func (p *Pipeline) Pipe(m think.Handler) *Pipeline {
+func (p *Pipeline) Pipe(m contracts.Middleware) *Pipeline {
 	p.pipeline.PushBack(m)
 	return p
 }
 
 // Pipe Batch push Middleware Handlers to the pipeline
-func (p *Pipeline) Through(hls []think.Handler) *Pipeline {
+func (p *Pipeline) Through(hls []contracts.Middleware) *Pipeline {
 	for _, hl := range hls {
 		p.Pipe(hl)
 	}
@@ -39,12 +41,17 @@ func (p *Pipeline) Through(hls []think.Handler) *Pipeline {
 }
 
 // Passable set the request being sent through the pipeline.
-func (p *Pipeline) Passable(passable *context.Request) *Pipeline {
+func (p *Pipeline) Passable(passable *ctx.Request) *Pipeline {
 	p.passable = passable
 	return p
 }
 
-// Run run the pipeline
+// Then Run the pipeline with a final destination callback.
+func (p *Pipeline) Then(hl contracts.Middleware) {
+	p.Pipe(hl)
+}
+
+// Run the pipeline
 func (p *Pipeline) Run() interface{} {
 	var result interface{}
 	e := p.pipeline.Front()
@@ -56,39 +63,35 @@ func (p *Pipeline) Run() interface{} {
 
 // ServeHTTP
 func (p *Pipeline) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	request := context.NewRequest(r)
-	request.CookieHandler = context.ParseCookieHandler()
+	request := ctx.NewRequest(r)
+	request.CookieHandler = ctx.ParseCookieHandler()
 	p.Passable(request)
 
 	result := p.Run()
 
-	switch result.(type) {
+	switch result := result.(type) {
 	case router.Response:
-		result.(router.Response).Send(w)
-		break
+		result.Send(w)
 	case template.HTML:
-		think.Html(string(result.(template.HTML))).Send(w)
-		break
+		think.Html(string(result)).Send(w)
 	case http.Handler:
-		result.(http.Handler).ServeHTTP(w, r)
-		break
+		result.ServeHTTP(w, r)
 	default:
 		think.Response(result).Send(w)
-		break
 	}
 }
 
-func (p *Pipeline) handler(passable *context.Request, e *list.Element) interface{} {
+func (p *Pipeline) handler(passable *ctx.Request, e *list.Element) interface{} {
 	if e == nil {
 		return nil
 	}
-	hl := e.Value.(think.Handler)
-	result := hl.Process(passable, p.closure(e))
+	hl := e.Value.(contracts.Middleware)
+	result := hl.Handle(passable, p.closure(e))
 	return result
 }
 
-func (p *Pipeline) closure(e *list.Element) think.Closure {
-	return func(req *context.Request) interface{} {
+func (p *Pipeline) closure(e *list.Element) contracts.Next {
+	return func(req *ctx.Request) interface{} {
 		e = e.Next()
 		return p.handler(req, e)
 	}

@@ -6,27 +6,27 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/ctx"
 )
 
 // Json Create a new HTTP Response with JSON data
-func Json(v interface{}) *context.Response {
+func Json(v interface{}) *ctx.Response {
 	c, _ := json.Marshal(v)
-	return context.NewResponse().SetContent(string(c)).SetContentType("application/json")
+	return ctx.NewResponse().SetContent(string(c)).SetContentType("application/json")
 }
 
 // Text Create a new HTTP Response with TEXT data
-func Text(s string) *context.Response {
-	return context.NewResponse().SetContent(s).SetContentType("text/plain")
+func Text(s string) *ctx.Response {
+	return ctx.NewResponse().SetContent(s).SetContentType("text/plain")
 }
 
 // Text Create a new HTTP Response with HTML data
-func Html(s string) *context.Response {
-	return context.NewResponse().SetContent(s)
+func Html(s string) *ctx.Response {
+	return ctx.NewResponse().SetContent(s)
 }
 
-func Response(v interface{}) *context.Response {
-	r := context.NewResponse()
+func Response(v interface{}) *ctx.Response {
+	r := ctx.NewResponse()
 	r.SetContentType("text/plain")
 
 	var content string

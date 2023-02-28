@@ -1,20 +1,20 @@
-package think
+package middleware
 
 import (
 	"github.com/forgoer/thinkgo/config"
-	"github.com/forgoer/thinkgo/context"
+	. "github.com/forgoer/thinkgo/contracts"
+	"github.com/forgoer/thinkgo/ctx"
 	"github.com/forgoer/thinkgo/session"
 )
 
-type SessionHandler struct {
+type Session struct {
 	Manager *session.Manager
-	app     *Application
+	app     Application
 }
 
-// SessionHandler The default SessionHandler
-func NewSessionHandler(app *Application) Handler {
-	handler := &SessionHandler{}
-	handler.Manager = session.NewManager(&session.Config{
+// New the default Session handler
+func (h *Session) New(app Application) {
+	h.Manager = session.NewManager(&session.Config{
 		Driver:     config.Session.Driver,
 		CookieName: config.Session.CookieName,
 		Lifetime:   config.Session.Lifetime,
@@ -22,12 +22,11 @@ func NewSessionHandler(app *Application) Handler {
 		Files:      config.Session.Files,
 	})
 
-	handler.app = app
-
-	return handler
+	h.app = app
 }
 
-func (h *SessionHandler) Process(req *context.Request, next Closure) interface{} {
+// Handle an incoming request.
+func (h *Session) Handle(req *ctx.Request, next Next) interface{} {
 	store := h.startSession(req)
 
 	req.SetSession(store)
@@ -41,10 +40,10 @@ func (h *SessionHandler) Process(req *context.Request, next Closure) interface{}
 	return result
 }
 
-func (h *SessionHandler) startSession(req *context.Request) *session.Store {
+func (h *Session) startSession(req *ctx.Request) *session.Store {
 	return h.Manager.SessionStart(req)
 }
 
-func (h *SessionHandler) saveSession(res session.Response) {
+func (h *Session) saveSession(res session.Response) {
 	h.Manager.SessionSave(res)
 }

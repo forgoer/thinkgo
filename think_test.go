@@ -3,7 +3,8 @@ package thinkgo
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/ctx"
+	"github.com/forgoer/thinkgo/router"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -12,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/forgoer/thinkgo/think"
+	"github.com/stretchr/testify/assert"
 )
 
-func testRequest(t *testing.T, method, url string, data url.Values, res *think.Res) {
+func testRequest(t *testing.T, method, url string, data url.Values, res *ctx.Response) {
 	var err error
 	var resp *http.Response
 
@@ -66,8 +67,8 @@ func TestRunWithPort(t *testing.T) {
 	th := New()
 
 	go func() {
-		th.RegisterRoute(func(route *think.Route) {
-			route.Get("/", func(req *think.Req) *think.Res {
+		th.Route(func(route *router.Route) {
+			route.Get("/", func(req *ctx.Request) *ctx.Response {
 				return think.Text("it worked")
 			})
 		})
@@ -75,23 +76,23 @@ func TestRunWithPort(t *testing.T) {
 		th.Run(":9012")
 	}()
 
-	time.Sleep(5 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
-	testRequest(t, "get", "http://localhost:9012/", nil, context.NewResponse().SetContent("it worked"))
+	testRequest(t, "get", "http://localhost:9012/", nil, ctx.NewResponse().SetContent("it worked"))
 }
 
 func TestThink_Run(t *testing.T) {
 	th := New()
 
 	go func() {
-		th.RegisterRoute(func(route *think.Route) {
-			route.Get("/", func(req *think.Req) interface{} {
+		th.Route(func(route *router.Route) {
+			route.Get("/", func(req *ctx.Request) interface{} {
 				return "it worked"
 			})
-			route.Get("/user/{name}", func(req *think.Req, name string) interface{} {
+			route.Get("/user/{name}", func(req *ctx.Request, name string) interface{} {
 				return fmt.Sprintf("Hello %s !", name)
 			})
-			route.Post("/user", func(req *think.Req) interface{} {
+			route.Post("/user", func(req *ctx.Request) interface{} {
 				name, err := req.Post("name")
 				if err != nil {
 					panic(err)
@@ -108,8 +109,8 @@ func TestThink_Run(t *testing.T) {
 
 	time.Sleep(5 * time.Millisecond)
 
-	testRequest(t, "get", "http://localhost:9011/", nil, context.NewResponse().SetContent("it worked"))
-	testRequest(t, "get", "http://localhost:9011/user/thinkgo", nil, context.NewResponse().SetContent(fmt.Sprintf("Hello %s !", "thinkgo")))
-	testRequest(t, "post", "http://localhost:9011/user", url.Values{"name": {"thinkgo"}}, context.NewResponse().SetContent(fmt.Sprintf("Create %s", "thinkgo")))
-	testRequest(t, "delete", "http://localhost:9011/user/thinkgo", url.Values{"name": {"thinkgo"}}, context.NewResponse().SetContent(fmt.Sprintf("Delete %s", "thinkgo")))
+	testRequest(t, "get", "http://localhost:9011/", nil, ctx.NewResponse().SetContent("it worked"))
+	testRequest(t, "get", "http://localhost:9011/user/thinkgo", nil, ctx.NewResponse().SetContent(fmt.Sprintf("Hello %s !", "thinkgo")))
+	testRequest(t, "post", "http://localhost:9011/user", url.Values{"name": {"thinkgo"}}, ctx.NewResponse().SetContent(fmt.Sprintf("Create %s", "thinkgo")))
+	testRequest(t, "delete", "http://localhost:9011/user/thinkgo", url.Values{"name": {"thinkgo"}}, ctx.NewResponse().SetContent(fmt.Sprintf("Delete %s", "thinkgo")))
 }

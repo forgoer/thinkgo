@@ -3,13 +3,13 @@ package router
 import (
 	"container/list"
 
-	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/ctx"
 )
 
 type Pipeline struct {
 	handlers []Middleware
 	pipeline *list.List
-	passable *context.Request
+	passable *ctx.Request
 }
 
 // Pipeline returns a new Pipeline
@@ -35,7 +35,7 @@ func (p *Pipeline) Through(hls []Middleware) *Pipeline {
 }
 
 // Passable set the request being sent through the pipeline.
-func (p *Pipeline) Passable(passable *context.Request) *Pipeline {
+func (p *Pipeline) Passable(passable *ctx.Request) *Pipeline {
 	p.passable = passable
 	return p
 }
@@ -53,7 +53,7 @@ func (p *Pipeline) Run(destination Middleware) interface{} {
 	return result
 }
 
-func (p *Pipeline) handler(passable *context.Request, e *list.Element) interface{} {
+func (p *Pipeline) handler(passable *ctx.Request, e *list.Element) interface{} {
 	if e == nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func (p *Pipeline) handler(passable *context.Request, e *list.Element) interface
 }
 
 func (p *Pipeline) closure(e *list.Element) Closure {
-	return func(req *context.Request) interface{} {
+	return func(req *ctx.Request) interface{} {
 		e = e.Next()
 		return p.handler(req, e)
 	}

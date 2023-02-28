@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/ctx"
 )
 
 // Rule Route rule
@@ -78,7 +78,7 @@ func (r *Rule) GatherRouteMiddleware() []Middleware {
 }
 
 // Run Run the route action and return the response.
-func (r *Rule) Run(request *context.Request) (result interface{}) {
+func (r *Rule) Run(request *ctx.Request) (result interface{}) {
 	if r.handler == nil {
 		return
 	}
@@ -136,7 +136,7 @@ func (r *Rule) compileParameterNames() []string {
 	return result
 }
 
-func parseParams(value reflect.Value, request *context.Request, parameters []*parameter) []reflect.Value {
+func parseParams(value reflect.Value, request *ctx.Request, parameters []*parameter) []reflect.Value {
 	valueType := value.Type()
 	needNum := valueType.NumIn()
 	if needNum < 1 {

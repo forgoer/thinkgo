@@ -1,11 +1,11 @@
-package context
+package ctx
 
 import (
 	"net/http"
 )
 
 type Response struct {
-	// Writer      context.ResponseWriter
+	// Writer      ctx.ResponseWriter
 	contentType   string
 	charset       string
 	code          int

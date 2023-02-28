@@ -249,7 +249,7 @@ package controller
 
 import (
 	"github.com/forgoer/thinkgo"
-	"github.com/forgoer/thinkgo/context"
+	"github.com/forgoer/thinkgo/http"
 )
 
 func Index(req *context.Request) *context.Response {
